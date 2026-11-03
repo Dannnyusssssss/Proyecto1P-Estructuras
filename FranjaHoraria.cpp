@@ -5,18 +5,24 @@
  * Purpose: Implementation of the class FranjaHoraria
  ***********************************************************************/
 
+// Archivo: FranjaHoraria.cpp
+// Contiene la implementación de la clase FranjaHoraria.
+
 #include "Hora.h"
 #include "FranjaHoraria.h"
+#include <iostream>
 
 ////////////////////////////////////////////////////////////////////////
 // Name:       FranjaHoraria::FranjaHoraria()
 // Purpose:    Implementation of FranjaHoraria::FranjaHoraria()
-// Return:     
+// Return:
 ////////////////////////////////////////////////////////////////////////
 
+// Franja vacía: los punteros se dejan en nullptr para que el destructor pueda hacer
+// delete sin riesgo (delete de nullptr no hace nada).
 FranjaHoraria::FranjaHoraria()
+   : horaInicio(nullptr), horaFinal(nullptr), aula(""), cedulaProfesor("")
 {
-   hora = NULL;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -27,23 +33,28 @@ FranjaHoraria::FranjaHoraria()
 // - horaFinal
 // - aula
 // - cedulaProfesor
-// Return:     
+// Return:
 ////////////////////////////////////////////////////////////////////////
 
+// Se guardan los MISMOS punteros recibidos (sin new): desde aquí la franja es su dueña.
 FranjaHoraria::FranjaHoraria(Hora * horaInicio, Hora* horaFinal, std::string aula, std::string cedulaProfesor)
+   : horaInicio(horaInicio), horaFinal(horaFinal), aula(aula), cedulaProfesor(cedulaProfesor)
 {
-   // TODO : implement
 }
 
 ////////////////////////////////////////////////////////////////////////
 // Name:       FranjaHoraria::~FranjaHoraria()
 // Purpose:    Implementation of FranjaHoraria::~FranjaHoraria()
-// Return:     
+// Return:
 ////////////////////////////////////////////////////////////////////////
 
+// Libera las dos horas, de las que la franja es dueña.
 FranjaHoraria::~FranjaHoraria()
 {
-   // TODO : implement
+   delete horaInicio;
+   delete horaFinal;
+   horaInicio = nullptr;
+   horaFinal = nullptr;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -52,7 +63,8 @@ FranjaHoraria::~FranjaHoraria()
 // Return:     Hora*
 ////////////////////////////////////////////////////////////////////////
 
-Hora* FranjaHoraria::getHoraInicio(void)
+// Devuelve la hora de inicio sin transferir su propiedad.
+Hora* FranjaHoraria::getHoraInicio(void) const
 {
    return horaInicio;
 }
@@ -65,9 +77,16 @@ Hora* FranjaHoraria::getHoraInicio(void)
 // Return:     void
 ////////////////////////////////////////////////////////////////////////
 
+// Reemplaza la hora de inicio liberando la anterior.
 void FranjaHoraria::setHoraInicio(Hora* newHoraInicio)
 {
-   horaInicio = newHoraInicio;
+   // Si es el mismo puntero, borrarlo dejaría a la franja apuntando a memoria liberada
+   if (newHoraInicio == horaInicio)
+   {
+      return;
+   }
+   delete horaInicio;            // se libera la hora anterior (la franja era su dueña)
+   horaInicio = newHoraInicio;   // y se toma posesión de la nueva
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -76,7 +95,8 @@ void FranjaHoraria::setHoraInicio(Hora* newHoraInicio)
 // Return:     Hora*
 ////////////////////////////////////////////////////////////////////////
 
-Hora* FranjaHoraria::getHoraFinal(void)
+// Devuelve la hora de fin sin transferir su propiedad.
+Hora* FranjaHoraria::getHoraFinal(void) const
 {
    return horaFinal;
 }
@@ -89,9 +109,16 @@ Hora* FranjaHoraria::getHoraFinal(void)
 // Return:     void
 ////////////////////////////////////////////////////////////////////////
 
+// Reemplaza la hora de fin liberando la anterior.
 void FranjaHoraria::setHoraFinal(Hora* newHoraFinal)
 {
-   horaFinal = newHoraFinal;
+   // Si es el mismo puntero, borrarlo dejaría a la franja apuntando a memoria liberada
+   if (newHoraFinal == horaFinal)
+   {
+      return;
+   }
+   delete horaFinal;           // se libera la hora anterior (la franja era su dueña)
+   horaFinal = newHoraFinal;   // y se toma posesión de la nueva
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -100,7 +127,8 @@ void FranjaHoraria::setHoraFinal(Hora* newHoraFinal)
 // Return:     std::string
 ////////////////////////////////////////////////////////////////////////
 
-std::string FranjaHoraria::getAula(void)
+// Devuelve el aula guardada.
+std::string FranjaHoraria::getAula(void) const
 {
    return aula;
 }
@@ -113,6 +141,7 @@ std::string FranjaHoraria::getAula(void)
 // Return:     void
 ////////////////////////////////////////////////////////////////////////
 
+// Reemplaza el aula.
 void FranjaHoraria::setAula(std::string newAula)
 {
    aula = newAula;
@@ -124,7 +153,8 @@ void FranjaHoraria::setAula(std::string newAula)
 // Return:     std::string
 ////////////////////////////////////////////////////////////////////////
 
-std::string FranjaHoraria::getCedulaProfesor(void)
+// Devuelve la cédula del profesor dueño de la franja.
+std::string FranjaHoraria::getCedulaProfesor(void) const
 {
    return cedulaProfesor;
 }
@@ -137,6 +167,7 @@ std::string FranjaHoraria::getCedulaProfesor(void)
 // Return:     void
 ////////////////////////////////////////////////////////////////////////
 
+// Reemplaza la cédula del profesor.
 void FranjaHoraria::setCedulaProfesor(std::string newCedulaProfesor)
 {
    cedulaProfesor = newCedulaProfesor;
@@ -150,9 +181,25 @@ void FranjaHoraria::setCedulaProfesor(std::string newCedulaProfesor)
 // Return:     bool
 ////////////////////////////////////////////////////////////////////////
 
-bool FranjaHoraria::puedeRegistrarEntrada(Hora* hora)
+// Comprueba si hora está en la ventana de entrada [horaInicio, horaInicio + 10].
+bool FranjaHoraria::puedeRegistrarEntrada(Hora* hora) const
 {
-   // TODO : implement
+   // Sin hora a consultar o sin hora de inicio no hay ventana que comparar
+   if (hora == nullptr || horaInicio == nullptr)
+   {
+      return false;
+   }
+
+   // Fin de la ventana: horaInicio + 10 minutos. sumarMinutos crea un objeto nuevo
+   // del que este método es dueño, por eso se libera antes de salir
+   Hora* limite = horaInicio->sumarMinutos(10);
+
+   // Ambos extremos se incluyen: 07:00 y 07:10 son válidas, 06:59 y 07:11 no
+   bool dentro = hora->esMayorIgual(horaInicio)   // no antes del inicio
+              && hora->esMenorIgual(limite);      // ni después de los 10 minutos
+
+   delete limite;   // hora NO se libera: solo se consultó
+   return dentro;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -163,9 +210,24 @@ bool FranjaHoraria::puedeRegistrarEntrada(Hora* hora)
 // Return:     bool
 ////////////////////////////////////////////////////////////////////////
 
-bool FranjaHoraria::puedeRegistrarSalida(Hora* hora)
+// Comprueba si hora está en la ventana de salida [horaFinal, horaFinal + 10].
+bool FranjaHoraria::puedeRegistrarSalida(Hora* hora) const
 {
-   // TODO : implement
+   // Sin hora a consultar o sin hora de fin no hay ventana que comparar
+   if (hora == nullptr || horaFinal == nullptr)
+   {
+      return false;
+   }
+
+   // Fin de la ventana: horaFinal + 10 minutos (objeto nuevo, se libera antes de salir)
+   Hora* limite = horaFinal->sumarMinutos(10);
+
+   // Ambos extremos se incluyen: 09:00 y 09:10 son válidas, 08:59 y 09:11 no
+   bool dentro = hora->esMayorIgual(horaFinal)    // no antes de que termine la clase
+              && hora->esMenorIgual(limite);      // ni después de los 10 minutos
+
+   delete limite;   // hora NO se libera: solo se consultó
+   return dentro;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -174,9 +236,16 @@ bool FranjaHoraria::puedeRegistrarSalida(Hora* hora)
 // Return:     std::string
 ////////////////////////////////////////////////////////////////////////
 
-std::string FranjaHoraria::getClave(void)
+// La cédula y la hora de inicio identifican la franja: un profesor no puede tener
+// dos franjas que empiecen a la misma hora.
+std::string FranjaHoraria::getClave(void) const
 {
-   // TODO : implement
+   // Sin hora de inicio solo queda la parte de la cédula
+   if (horaInicio == nullptr)
+   {
+      return cedulaProfesor + "-";
+   }
+   return cedulaProfesor + "-" + horaInicio->toString();
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -185,7 +254,11 @@ std::string FranjaHoraria::getClave(void)
 // Return:     void
 ////////////////////////////////////////////////////////////////////////
 
-void FranjaHoraria::mostrar(void)
+// Imprime el horario y el aula en una línea.
+void FranjaHoraria::mostrar(void) const
 {
-   // TODO : implement
+   // Si falta una hora se muestra "--:--" en lugar de acceder a un puntero nulo
+   std::string inicio = (horaInicio != nullptr) ? horaInicio->toString() : "--:--";
+   std::string fin = (horaFinal != nullptr) ? horaFinal->toString() : "--:--";
+   std::cout << inicio << " - " << fin << " | Aula: " << aula << std::endl;
 }
