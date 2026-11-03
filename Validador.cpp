@@ -5,7 +5,13 @@
  * Purpose: Implementation of the class Validador
  ***********************************************************************/
 
+// Archivo: Validador.cpp
+// Contiene la implementación de la clase Validador.
+// Cada expresión regular se declara static const dentro de su método para que
+// se construya una sola vez y no en cada llamada.
+
 #include "Validador.h"
+#include <regex>
 
 ////////////////////////////////////////////////////////////////////////
 // Name:       Validador::validarCedula(std::string cedula)
@@ -15,9 +21,66 @@
 // Return:     bool
 ////////////////////////////////////////////////////////////////////////
 
+// Valida una cédula ecuatoriana con el algoritmo oficial de módulo 10.
 bool Validador::validarCedula(std::string cedula)
 {
-   // TODO : implement
+   // Paso 1 - Formato: exactamente 10 dígitos.
+   // Acepta "1710034065". Rechaza vacío, 9 u 11 dígitos, letras, espacios o guiones.
+   static const std::regex formato(R"(^\d{10}$)");
+   if (!std::regex_match(cedula, formato))
+   {
+      return false;
+   }
+
+   // Paso 2 - Provincia: los dos primeros dígitos entre 01 y 24, o 30 (registrados en el exterior).
+   // 0[1-9] cubre 01-09, 1\d cubre 10-19, 2[0-4] cubre 20-24.
+   // Rechaza 00, 25-29 y 31-99.
+   static const std::regex provincia(R"(^(0[1-9]|1\d|2[0-4]|30)\d{8}$)");
+   if (!std::regex_match(cedula, provincia))
+   {
+      return false;
+   }
+
+   // Paso 3 - Tercer dígito menor que 6 (0 a 5 corresponde a persona natural).
+   // Rechaza 6, 7, 8 y 9 en la tercera posición.
+   static const std::regex tercerDigito(R"(^\d{2}[0-5]\d{7}$)");
+   if (!std::regex_match(cedula, tercerDigito))
+   {
+      return false;
+   }
+
+   // Paso 4 - Dígito verificador. Una regex no puede hacer cuentas, por eso este paso es aritmético.
+   // A estas alturas la regex ya garantizó que los 10 caracteres son dígitos.
+   int suma = 0;
+   for (int i = 0; i < 9; i++)   // se recorren solo los primeros 9 dígitos
+   {
+      // Restar '0' convierte el carácter del dígito en su valor numérico ('7' - '0' = 7)
+      int digito = cedula[i] - '0';
+
+      // Las posiciones impares (1.ª, 3.ª, 5.ª, 7.ª, 9.ª) son los índices pares 0, 2, 4, 6, 8:
+      // esas se multiplican por 2; las posiciones pares se multiplican por 1 (quedan igual).
+      if (i % 2 == 0)
+      {
+         digito = digito * 2;
+
+         // Si el producto pasa de 9 se le resta 9 (equivale a sumar sus dos cifras: 14 -> 1+4 = 5)
+         if (digito > 9)
+         {
+            digito = digito - 9;
+         }
+      }
+
+      // Se acumulan todos los resultados
+      suma = suma + digito;
+   }
+
+   // El verificador es lo que le falta a la suma para llegar a la siguiente decena.
+   // El % 10 final hace que, si la suma ya es múltiplo de 10, el verificador sea 0 y no 10.
+   int verificador = (10 - (suma % 10)) % 10;
+
+   // La cédula es real solo si el verificador calculado coincide con el décimo dígito
+   int decimoDigito = cedula[9] - '0';
+   return verificador == decimoDigito;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -28,9 +91,20 @@ bool Validador::validarCedula(std::string cedula)
 // Return:     bool
 ////////////////////////////////////////////////////////////////////////
 
+// Valida un nombre o apellido.
 bool Validador::validarNombre(std::string nombre)
 {
-   // TODO : implement
+   // Una "letra" es una de A-Z, a-z o una vocal con tilde, ñ o ü.
+   // Las letras con tilde ocupan 2 bytes en UTF-8, por eso van como alternativas (|)
+   // y no dentro de [ ], donde la regex las partiría en bytes sueltos.
+   // Estructura: una palabra de letras, seguida de cero o más grupos "un espacio + palabra".
+   // Acepta "Juan", "María José", "Ñañez".
+   // Rechaza vacío, solo espacios, espacios al inicio o al final, dos espacios seguidos,
+   // dígitos ("Juan3") y símbolos.
+   static const std::regex patron(
+      R"(^(?:[A-Za-z]|á|é|í|ó|ú|Á|É|Í|Ó|Ú|ñ|Ñ|ü|Ü)+)"
+      R"((?: (?:[A-Za-z]|á|é|í|ó|ú|Á|É|Í|Ó|Ú|ñ|Ñ|ü|Ü)+)*$)");
+   return std::regex_match(nombre, patron);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -41,9 +115,14 @@ bool Validador::validarNombre(std::string nombre)
 // Return:     bool
 ////////////////////////////////////////////////////////////////////////
 
+// Valida una hora en formato HH:MM de 24 horas.
 bool Validador::validarHora(std::string horaIngresada)
 {
-   // TODO : implement
+   // Horas: [01]\d cubre 00-19 y 2[0-3] cubre 20-23. Minutos: [0-5]\d cubre 00-59.
+   // Acepta "07:10" y "23:59".
+   // Rechaza "24:00", "07:60", "7:10" (falta el cero a la izquierda) y "ab:cd".
+   static const std::regex patron(R"(^([01]\d|2[0-3]):[0-5]\d$)");
+   return std::regex_match(horaIngresada, patron);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -54,9 +133,60 @@ bool Validador::validarHora(std::string horaIngresada)
 // Return:     bool
 ////////////////////////////////////////////////////////////////////////
 
+// Valida una fecha en formato AAAA-MM-DD, incluidos los días de cada mes y el año bisiesto.
 bool Validador::validarFecha(std::string fecha)
 {
-   // TODO : implement
+   // Paso 1 - Formato: 4 dígitos, guion, 2 dígitos, guion, 2 dígitos.
+   // Acepta "2026-11-03". Rechaza "03-11-2026" (orden invertido), "2026/11/03",
+   // "2026-1-3" (sin ceros a la izquierda) y el texto vacío.
+   static const std::regex formato(R"(^\d{4}-\d{2}-\d{2}$)");
+   if (!std::regex_match(fecha, formato))
+   {
+      return false;
+   }
+
+   // Paso 2 - Mes entre 01 y 12: 0[1-9] cubre 01-09 y 1[0-2] cubre 10-12.
+   // Rechaza "00" y "13" en adelante.
+   static const std::regex mes(R"(^\d{4}-(0[1-9]|1[0-2])-\d{2}$)");
+   if (!std::regex_match(fecha, mes))
+   {
+      return false;
+   }
+
+   // Paso 3 - Día entre 01 y el máximo del mes. Tres alternativas según el mes:
+   //  - meses de 31 días (01, 03, 05, 07, 08, 10, 12): días 01-31
+   //  - meses de 30 días (04, 06, 09, 11): días 01-30
+   //  - febrero (02): días 01-29 (si el 29 es válido se decide en el paso 4)
+   // Rechaza el día 00, "2026-04-31", "2026-02-30" y "2026-01-32".
+   static const std::regex diaDelMes(
+      R"(^\d{4}-(?:)"
+      R"((?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01]))"
+      R"(|(?:0[469]|11)-(?:0[1-9]|[12]\d|30))"
+      R"(|02-(?:0[1-9]|1\d|2\d))"
+      R"()$)");
+   if (!std::regex_match(fecha, diaDelMes))
+   {
+      return false;
+   }
+
+   // Paso 4 - Año bisiesto. Solo importa si la fecha es un 29 de febrero:
+   // cualquier otra fecha que llegó hasta aquí ya es válida.
+   static const std::regex veintinueveFebrero(R"(^\d{4}-02-29$)");
+   if (!std::regex_match(fecha, veintinueveFebrero))
+   {
+      return true;
+   }
+
+   // Una regex no puede calcular divisibilidad, por eso este paso es aritmético.
+   // El paso 1 garantizó que los 4 primeros caracteres son dígitos, así que stoi no falla.
+   int anio = std::stoi(fecha.substr(0, 4));
+
+   // Un año es bisiesto si es múltiplo de 4, salvo los múltiplos de 100 que no lo sean de 400
+   // (2024 sí, 2026 no, 2100 no, 2000 sí)
+   bool bisiesto = (anio % 4 == 0 && anio % 100 != 0) || (anio % 400 == 0);
+
+   // El 29 de febrero solo existe en los años bisiestos
+   return bisiesto;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -67,9 +197,14 @@ bool Validador::validarFecha(std::string fecha)
 // Return:     bool
 ////////////////////////////////////////////////////////////////////////
 
+// Valida el nombre de un aula.
 bool Validador::validarAula(std::string aula)
 {
-   // TODO : implement
+   // Uno o más bloques de letras o dígitos, unidos por un solo guion.
+   // Acepta "A-101", "Lab3", "B2-LAB-1".
+   // Rechaza vacío, espacios ("A 101"), símbolos ("!"), guion al inicio o al final y "--".
+   static const std::regex patron(R"(^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$)");
+   return std::regex_match(aula, patron);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -80,7 +215,12 @@ bool Validador::validarAula(std::string aula)
 // Return:     bool
 ////////////////////////////////////////////////////////////////////////
 
+// Valida que la opción escrita en un menú sea un número.
 bool Validador::validarOpcionMenu(std::string opcion)
 {
-   // TODO : implement
+   // Uno o dos dígitos, sin signo ni espacios. El límite de dos dígitos evita
+   // textos enormes que desbordarían al convertirlos a int.
+   // Acepta "1", "0", "12". Rechaza "a", "", "-1", " 1" y "123".
+   static const std::regex patron(R"(^\d{1,2}$)");
+   return std::regex_match(opcion, patron);
 }
