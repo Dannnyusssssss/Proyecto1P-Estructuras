@@ -259,9 +259,11 @@ void Menu::menuAdministrador(void)
          }
          else
          {
-            // La franja es predefinida y el aula es válida: queda profesor inexistente o franja repetida
-            std::cout << "No se pudo asignar: verifique que el profesor esté registrado "
-                         "y que no tenga ya esa franja." << std::endl;
+            // La franja es predefinida y el aula es válida: queda profesor inexistente, franja
+            // repetida o aula ocupada en ese horario por otro profesor (decisión 25)
+            std::cout << "No se pudo asignar: verifique que el profesor esté registrado, "
+                         "que no tenga ya esa franja y que el aula no esté ocupada en ese "
+                         "horario por otro profesor." << std::endl;
             delete franja;   // rechazada: el menú la libera, junto con sus dos horas (decisión 4)
          }
       }

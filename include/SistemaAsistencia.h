@@ -50,8 +50,9 @@ public:
    bool agregarProfesor(Profesor* pro);
 
    // Agrega la franja al profesor con esa cédula. Rechaza (devuelve false) si fra es nullptr,
-   // si no existe el profesor, si el aula no es válida o si el profesor rechaza la franja
-   // (no predefinida, de otra cédula, duplicada o cruzada).
+   // si no existe el profesor, si el aula no es válida, si esa aula ya está ocupada en ese
+   // horario por otro profesor (sin distinguir mayúsculas: A-101 y a-101 son la misma aula)
+   // o si el profesor rechaza la franja (no predefinida, de otra cédula, duplicada o cruzada).
    // Propiedad de la memoria: si devuelve true, el profesor pasa a ser dueño de la franja;
    // si devuelve false, quien llamó conserva la franja y debe liberarla.
    bool agregarFranja(std::string cedula, FranjaHoraria* fra);
@@ -82,6 +83,12 @@ protected:
 private:
    ListaDoble<Profesor>* profesores;      // profesores registrados (el sistema es dueño de la lista)
    ListaDoble<Asistencia>* asistencias;   // asistencias registradas (el sistema es dueño de la lista)
+
+   // Método privado auxiliar (decisión 25): compara dos nombres de aula sin distinguir
+   // mayúsculas de minúsculas. Recibe las dos aulas y devuelve true si son la misma
+   // ("A-101" y "a-101" -> true). Solo convierte letras de la 'a' a la 'z', lo cual basta
+   // porque Validador::validarAula solo acepta letras sin tildes, números y guion.
+   bool mismaAula(std::string a, std::string b) const;
 
 
 };

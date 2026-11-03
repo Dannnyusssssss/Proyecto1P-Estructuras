@@ -243,6 +243,97 @@ TEST_CASE("SistemaAsistencia_agregarFranja_nula")
 }
 
 // ---------------------------------------------------------------------
+// agregarFranja: aula ocupada (decisión 25)
+// Siempre con dos profesores distintos. El primero recibe la franja con el ayudante;
+// para el segundo la franja se crea a mano, para poder revisarla y liberarla si se rechaza.
+// Se guarda el puntero al segundo profesor solo para consultar sus franjas: el sistema es su dueño.
+// ---------------------------------------------------------------------
+
+// Verifica que se rechace la misma aula en la misma franja para otro profesor, que ese
+// profesor no reciba la franja y que quien llamó la conserve (decisión 4).
+TEST_CASE("SistemaAsistencia_agregarFranja_aulaOcupadaMismaFranja")
+{
+   SistemaAsistencia* sistema = AyudaSistema::sistemaConFranja();   // 1710034065, 07:00-09:00, A-101
+   Profesor* segundo = new Profesor("0926687856", "Ana", "López");
+   REQUIRE(sistema->agregarProfesor(segundo) == true);              // el sistema pasa a ser su dueño
+
+   FranjaHoraria* franja = new FranjaHoraria(new Hora(7, 0), new Hora(9, 0), "A-101", "0926687856");
+   CHECK(sistema->agregarFranja("0926687856", franja) == false);    // A-101 ya está ocupada a las 07:00
+   CHECK(segundo->getFranjas()->estaVacia() == true);               // el segundo no recibió la franja
+   CHECK(franja->getAula() == "A-101");                             // la franja sigue intacta en manos de la prueba
+   delete franja;                                                   // rechazada: la libera quien llamó
+   delete sistema;
+}
+
+// Verifica que "a-101" se considere la misma aula que "A-101" (no distingue mayúsculas).
+TEST_CASE("SistemaAsistencia_agregarFranja_aulaOcupadaDistintaMayuscula")
+{
+   SistemaAsistencia* sistema = AyudaSistema::sistemaConFranja();   // 1710034065, 07:00-09:00, A-101
+   Profesor* segundo = new Profesor("0926687856", "Ana", "López");
+   REQUIRE(sistema->agregarProfesor(segundo) == true);
+
+   FranjaHoraria* franja = new FranjaHoraria(new Hora(7, 0), new Hora(9, 0), "a-101", "0926687856");
+   CHECK(sistema->agregarFranja("0926687856", franja) == false);    // a-101 es la misma aula que A-101
+   CHECK(segundo->getFranjas()->estaVacia() == true);
+   CHECK(franja->getAula() == "a-101");                             // el aula no se convirtió
+   delete franja;
+   delete sistema;
+}
+
+// Verifica que "LAB3" se considere la misma aula que "Lab3" (varias letras de distinto tipo).
+TEST_CASE("SistemaAsistencia_agregarFranja_aulaOcupadaLab3")
+{
+   SistemaAsistencia* sistema = new SistemaAsistencia();
+   AyudaSistema::agregarProfesor(sistema, "1710034065");
+   REQUIRE(AyudaSistema::agregarFranja(sistema, "1710034065", "07:00", "09:00", "Lab3") == true);
+   Profesor* segundo = new Profesor("0926687856", "Ana", "López");
+   REQUIRE(sistema->agregarProfesor(segundo) == true);
+
+   FranjaHoraria* franja = new FranjaHoraria(new Hora(7, 0), new Hora(9, 0), "LAB3", "0926687856");
+   CHECK(sistema->agregarFranja("0926687856", franja) == false);    // LAB3 es la misma aula que Lab3
+   CHECK(segundo->getFranjas()->estaVacia() == true);
+   CHECK(franja->getAula() == "LAB3");
+   delete franja;
+   delete sistema;
+}
+
+// Verifica que la misma aula sí se pueda usar en otra franja: a las 09:00 el aula está libre.
+TEST_CASE("SistemaAsistencia_agregarFranja_mismaAulaOtraFranja")
+{
+   SistemaAsistencia* sistema = AyudaSistema::sistemaConFranja();   // 1710034065, 07:00-09:00, A-101
+   Profesor* segundo = new Profesor("0926687856", "Ana", "López");
+   REQUIRE(sistema->agregarProfesor(segundo) == true);
+
+   FranjaHoraria* franja = new FranjaHoraria(new Hora(9, 0), new Hora(11, 0), "A-101", "0926687856");
+   bool aceptada = sistema->agregarFranja("0926687856", franja);
+   CHECK(aceptada == true);                                         // otra franja: no hay choque
+   CHECK(segundo->getFranjas()->getTamanio() == 1);                 // el segundo recibió la franja
+   if (!aceptada)
+   {
+      delete franja;   // solo si se rechazara la conserva la prueba (evita una fuga si falla)
+   }
+   delete sistema;     // si se aceptó, la libera el profesor al destruirse el sistema
+}
+
+// Verifica que otra aula sí se pueda usar en la misma franja por otro profesor.
+TEST_CASE("SistemaAsistencia_agregarFranja_otraAulaMismaFranja")
+{
+   SistemaAsistencia* sistema = AyudaSistema::sistemaConFranja();   // 1710034065, 07:00-09:00, A-101
+   Profesor* segundo = new Profesor("0926687856", "Ana", "López");
+   REQUIRE(sistema->agregarProfesor(segundo) == true);
+
+   FranjaHoraria* franja = new FranjaHoraria(new Hora(7, 0), new Hora(9, 0), "B-202", "0926687856");
+   bool aceptada = sistema->agregarFranja("0926687856", franja);
+   CHECK(aceptada == true);                                         // aulas distintas: no hay choque
+   CHECK(segundo->getFranjas()->getTamanio() == 1);
+   if (!aceptada)
+   {
+      delete franja;
+   }
+   delete sistema;
+}
+
+// ---------------------------------------------------------------------
 // registrarEntrada
 // ---------------------------------------------------------------------
 
@@ -453,7 +544,8 @@ TEST_CASE("SistemaAsistencia_mostrarAsistenciaProfesor_filtraPorCedula")
 {
    SistemaAsistencia* sistema = AyudaSistema::sistemaConFranja();
    AyudaSistema::agregarProfesor(sistema, "0926687856", "Ana", "López");
-   AyudaSistema::agregarFranja(sistema, "0926687856", "07:00", "09:00");
+   // Otra aula: A-101 ya la ocupa el primer profesor a las 07:00 (decisión 25)
+   AyudaSistema::agregarFranja(sistema, "0926687856", "07:00", "09:00", "B-202");
    AyudaSistema::entrada(sistema, "1710034065", "2026-11-03", "07:05");
    AyudaSistema::entrada(sistema, "0926687856", "2026-11-03", "07:06");
    std::string impreso;

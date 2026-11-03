@@ -115,6 +115,37 @@ bool SistemaAsistencia::agregarFranja(std::string cedula, FranjaHoraria* fra)
       return false;
    }
 
+   // Aula ocupada (decisión 25): un aula no puede tener a dos profesores distintos en la
+   // misma franja. Se revisa aquí porque el sistema es el único que ve a todos los profesores
+   int inicioNueva = fra->getHoraInicio()->getTotalMinutos();   // inicio de la franja nueva en minutos
+   for (int i = 0; i < profesores->getTamanio(); i++)
+   {
+      Profesor* otro = profesores->obtener(i);   // solo se consulta: la lista sigue siendo su dueña
+
+      // El mismo profesor no se compara: si repite la franja, ya la rechaza Profesor::agregarFranja
+      if (otro->getCedula() == cedula)
+      {
+         continue;
+      }
+
+      // Se recorren las franjas del otro profesor sin modificarlas
+      ListaDoble<FranjaHoraria>* franjasOtro = otro->getFranjas();
+      for (int j = 0; j < franjasOtro->getTamanio(); j++)
+      {
+         FranjaHoraria* existente = franjasOtro->obtener(j);
+
+         // Misma hora de inicio = misma franja (las 7 franjas fijas se identifican por su inicio)
+         bool mismaFranja = existente->getHoraInicio()->getTotalMinutos() == inicioNueva;
+
+         // Si coinciden franja y aula, el aula ya está ocupada: se rechaza sin liberar fra,
+         // porque quien llamó sigue siendo su dueño (decisión 4)
+         if (mismaFranja && mismaAula(existente->getAula(), fra->getAula()))
+         {
+            return false;
+         }
+      }
+   }
+
    // El profesor comprueba que sea predefinida, de su cédula, no duplicada y sin cruces.
    // Si la acepta, el profesor pasa a ser dueño de la franja
    return profesor->agregarFranja(fra);
@@ -292,4 +323,44 @@ void SistemaAsistencia::mostrarProfesores(void) const
       return;
    }
    profesores->mostrarTodos();
+}
+
+// Método privado auxiliar (decisión 25).
+// Compara dos aulas letra por letra sin distinguir mayúsculas: "A-101" y "a-101" son la misma.
+// No usa <cctype> (regla 8): pasa cada letra a mayúscula a mano. Basta con las letras de la
+// 'a' a la 'z' porque validarAula solo acepta letras sin tildes, números y guion.
+bool SistemaAsistencia::mismaAula(std::string a, std::string b) const
+{
+   // Si tienen distinta cantidad de caracteres no pueden ser la misma aula
+   if (a.length() != b.length())
+   {
+      return false;
+   }
+
+   // Se compara posición por posición
+   for (std::string::size_type i = 0; i < a.length(); i++)
+   {
+      char letraA = a[i];   // carácter de la primera aula
+      char letraB = b[i];   // carácter de la segunda aula
+
+      // Si es minúscula, se pasa a mayúscula restando la distancia entre 'a' y 'A'
+      // (en ASCII las minúsculas están 32 posiciones después de las mayúsculas)
+      if (letraA >= 'a' && letraA <= 'z')
+      {
+         letraA = letraA - ('a' - 'A');
+      }
+      if (letraB >= 'a' && letraB <= 'z')
+      {
+         letraB = letraB - ('a' - 'A');
+      }
+
+      // Números, guiones y mayúsculas no cambian; si un carácter difiere, son aulas distintas
+      if (letraA != letraB)
+      {
+         return false;
+      }
+   }
+
+   // Todos los caracteres coincidieron: es la misma aula
+   return true;
 }

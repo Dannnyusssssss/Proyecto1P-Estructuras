@@ -31,6 +31,7 @@ Las franjas son fijas: bloques de 2 horas entre las 07:00 y las 21:00.
 - No se puede registrar la salida sin haber registrado la entrada.
 - Un profesor no puede tener franjas repetidas ni cruzadas.
 - No se permiten cédulas repetidas.
+- Un aula no puede estar asignada a dos profesores distintos en la misma franja (sin distinguir mayúsculas: A-101 y a-101 son la misma aula)
 
 ## Validaciones
 
