@@ -5,20 +5,24 @@
  * Purpose: Implementation of the class Asistencia
  ***********************************************************************/
 
+// Archivo: Asistencia.cpp
+// Contiene la implementación de la clase Asistencia.
+
 #include "Hora.h"
-#include "Profesor.h"
 #include "Asistencia.h"
+#include <iostream>
 
 ////////////////////////////////////////////////////////////////////////
 // Name:       Asistencia::Asistencia()
 // Purpose:    Implementation of Asistencia::Asistencia()
-// Return:     
+// Return:
 ////////////////////////////////////////////////////////////////////////
 
+// Asistencia vacía: punteros en nullptr para que el destructor pueda hacer delete sin riesgo.
 Asistencia::Asistencia()
+   : cedulaProfesor(""), fecha(""), horaInicioFranja(nullptr),
+     horaEntrada(nullptr), horaSalida(nullptr), estado(SIN_REGISTRO)
 {
-   hora = NULL;
-   profesor = NULL;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -28,23 +32,38 @@ Asistencia::Asistencia()
 // - cedulaProfesor
 // - fecha
 // - horaInicioFranja
-// Return:     
+// Return:
 ////////////////////////////////////////////////////////////////////////
 
+// Guarda los datos y una copia de la hora de la franja. Todavía no hay entrada ni salida.
 Asistencia::Asistencia(std::string cedulaProfesor, std::string fecha, Hora* horaInicioFranja)
+   : cedulaProfesor(cedulaProfesor), fecha(fecha), horaInicioFranja(nullptr),
+     horaEntrada(nullptr), horaSalida(nullptr), estado(SIN_REGISTRO)
 {
-   // TODO : implement
+   // La hora recibida es de la franja: se crea un objeto nuevo con el mismo valor para
+   // no compartir el puntero (si no, la franja y la asistencia harían delete del mismo objeto).
+   // this->horaInicioFranja es el atributo; horaInicioFranja (sin this) es el parámetro.
+   if (horaInicioFranja != nullptr)
+   {
+      this->horaInicioFranja = new Hora(horaInicioFranja->getHoras(), horaInicioFranja->getMinutos());
+   }
 }
 
 ////////////////////////////////////////////////////////////////////////
 // Name:       Asistencia::~Asistencia()
 // Purpose:    Implementation of Asistencia::~Asistencia()
-// Return:     
+// Return:
 ////////////////////////////////////////////////////////////////////////
 
+// Libera las tres horas, de las que la asistencia es dueña (delete de nullptr no hace nada).
 Asistencia::~Asistencia()
 {
-   // TODO : implement
+   delete horaInicioFranja;
+   delete horaEntrada;
+   delete horaSalida;
+   horaInicioFranja = nullptr;
+   horaEntrada = nullptr;
+   horaSalida = nullptr;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -53,7 +72,8 @@ Asistencia::~Asistencia()
 // Return:     std::string
 ////////////////////////////////////////////////////////////////////////
 
-std::string Asistencia::getCedulaProfesor(void)
+// Devuelve la cédula del profesor.
+std::string Asistencia::getCedulaProfesor(void) const
 {
    return cedulaProfesor;
 }
@@ -64,7 +84,8 @@ std::string Asistencia::getCedulaProfesor(void)
 // Return:     std::string
 ////////////////////////////////////////////////////////////////////////
 
-std::string Asistencia::getFecha(void)
+// Devuelve la fecha de la asistencia.
+std::string Asistencia::getFecha(void) const
 {
    return fecha;
 }
@@ -75,7 +96,8 @@ std::string Asistencia::getFecha(void)
 // Return:     Hora*
 ////////////////////////////////////////////////////////////////////////
 
-Hora* Asistencia::getHoraEntrada(void)
+// Devuelve la hora de entrada sin transferir su propiedad.
+Hora* Asistencia::getHoraEntrada(void) const
 {
    return horaEntrada;
 }
@@ -88,9 +110,17 @@ Hora* Asistencia::getHoraEntrada(void)
 // Return:     void
 ////////////////////////////////////////////////////////////////////////
 
+// Reemplaza la hora de entrada liberando la anterior. No toca el estado:
+// solo registrarEntrada y registrarSalida pueden cambiarlo.
 void Asistencia::setHoraEntrada(Hora* newHoraEntrada)
 {
-   horaEntrada = newHoraEntrada;
+   // Si es el mismo puntero, borrarlo dejaría a la asistencia apuntando a memoria liberada
+   if (newHoraEntrada == horaEntrada)
+   {
+      return;
+   }
+   delete horaEntrada;             // se libera la hora anterior
+   horaEntrada = newHoraEntrada;   // y se toma posesión de la nueva
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -99,7 +129,8 @@ void Asistencia::setHoraEntrada(Hora* newHoraEntrada)
 // Return:     Hora*
 ////////////////////////////////////////////////////////////////////////
 
-Hora* Asistencia::getHoraSalida(void)
+// Devuelve la hora de salida sin transferir su propiedad.
+Hora* Asistencia::getHoraSalida(void) const
 {
    return horaSalida;
 }
@@ -112,9 +143,16 @@ Hora* Asistencia::getHoraSalida(void)
 // Return:     void
 ////////////////////////////////////////////////////////////////////////
 
+// Reemplaza la hora de salida liberando la anterior. No toca el estado.
 void Asistencia::setHoraSalida(Hora* newHoraSalida)
 {
-   horaSalida = newHoraSalida;
+   // Si es el mismo puntero, borrarlo dejaría a la asistencia apuntando a memoria liberada
+   if (newHoraSalida == horaSalida)
+   {
+      return;
+   }
+   delete horaSalida;            // se libera la hora anterior
+   horaSalida = newHoraSalida;   // y se toma posesión de la nueva
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -123,7 +161,8 @@ void Asistencia::setHoraSalida(Hora* newHoraSalida)
 // Return:     int
 ////////////////////////////////////////////////////////////////////////
 
-int Asistencia::getEstado(void)
+// Devuelve el estado numérico (0, 1 o 2).
+int Asistencia::getEstado(void) const
 {
    return estado;
 }
@@ -134,9 +173,10 @@ int Asistencia::getEstado(void)
 // Return:     bool
 ////////////////////////////////////////////////////////////////////////
 
-bool Asistencia::estaSinRegistro(void)
+// Estado 0: no se ha registrado nada todavía.
+bool Asistencia::estaSinRegistro(void) const
 {
-   // TODO : implement
+   return estado == SIN_REGISTRO;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -145,9 +185,10 @@ bool Asistencia::estaSinRegistro(void)
 // Return:     bool
 ////////////////////////////////////////////////////////////////////////
 
-bool Asistencia::tieneEntrada(void)
+// Estado 1: hay entrada y falta la salida.
+bool Asistencia::tieneEntrada(void) const
 {
-   // TODO : implement
+   return estado == ENTRADA_REGISTRADA;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -156,7 +197,8 @@ bool Asistencia::tieneEntrada(void)
 // Return:     Hora*
 ////////////////////////////////////////////////////////////////////////
 
-Hora* Asistencia::getHoraInicioFranja(void)
+// Devuelve la copia de la hora de inicio de la franja sin transferir su propiedad.
+Hora* Asistencia::getHoraInicioFranja(void) const
 {
    return horaInicioFranja;
 }
@@ -167,9 +209,30 @@ Hora* Asistencia::getHoraInicioFranja(void)
 // Return:     void
 ////////////////////////////////////////////////////////////////////////
 
-void Asistencia::mostrar(void)
+// Imprime la asistencia en una línea con el formato acordado.
+void Asistencia::mostrar(void) const
 {
-   // TODO : implement
+   // Las horas que todavía no existen se muestran como "--:--" en lugar de acceder a nullptr
+   std::string franja = (horaInicioFranja != nullptr) ? horaInicioFranja->toString() : "--:--";
+   std::string entrada = (horaEntrada != nullptr) ? horaEntrada->toString() : "--:--";
+   std::string salida = (horaSalida != nullptr) ? horaSalida->toString() : "--:--";
+
+   // Texto del estado para que el usuario no tenga que interpretar 0, 1 o 2
+   std::string textoEstado = "Sin registro";
+   if (estado == ENTRADA_REGISTRADA)
+   {
+      textoEstado = "Entrada registrada";
+   }
+   else if (estado == COMPLETA)
+   {
+      textoEstado = "Completa";
+   }
+
+   std::cout << fecha << " | Cédula: " << cedulaProfesor
+             << " | Franja: " << franja
+             << " | Entrada: " << entrada
+             << " | Salida: " << salida
+             << " | Estado: " << textoEstado << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -178,9 +241,10 @@ void Asistencia::mostrar(void)
 // Return:     bool
 ////////////////////////////////////////////////////////////////////////
 
-bool Asistencia::estaCompleta(void)
+// Estado 2: entrada y salida registradas.
+bool Asistencia::estaCompleta(void) const
 {
-   // TODO : implement
+   return estado == COMPLETA;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -191,9 +255,18 @@ bool Asistencia::estaCompleta(void)
 // Return:     void
 ////////////////////////////////////////////////////////////////////////
 
+// Transición 0 -> 1. Solo se permite desde "sin registro": una segunda entrada no cambia nada.
 void Asistencia::registrarEntrada(Hora* hora)
 {
-   // TODO : implement
+   if (hora == nullptr || estado != SIN_REGISTRO)
+   {
+      return;
+   }
+   // Se guarda una copia: la hora recibida sigue siendo de quien llamó.
+   // Se libera la hora anterior por si se había asignado una con setHoraEntrada
+   delete horaEntrada;
+   horaEntrada = new Hora(hora->getHoras(), hora->getMinutos());
+   estado = ENTRADA_REGISTRADA;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -204,9 +277,19 @@ void Asistencia::registrarEntrada(Hora* hora)
 // Return:     void
 ////////////////////////////////////////////////////////////////////////
 
+// Transición 1 -> 2. Sin entrada previa (estado 0) o con la asistencia ya completa (estado 2)
+// no se registra nada: no puede haber salida sin entrada ni dos salidas.
 void Asistencia::registrarSalida(Hora* hora)
 {
-   // TODO : implement
+   if (hora == nullptr || estado != ENTRADA_REGISTRADA)
+   {
+      return;
+   }
+   // Se guarda una copia: la hora recibida sigue siendo de quien llamó.
+   // Se libera la hora anterior por si se había asignado una con setHoraSalida
+   delete horaSalida;
+   horaSalida = new Hora(hora->getHoras(), hora->getMinutos());
+   estado = COMPLETA;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -215,7 +298,14 @@ void Asistencia::registrarSalida(Hora* hora)
 // Return:     std::string
 ////////////////////////////////////////////////////////////////////////
 
-std::string Asistencia::getClave(void)
+// Cédula + fecha + hora de inicio de la franja identifican la asistencia: así no puede
+// haber dos asistencias para el mismo profesor, la misma fecha y la misma franja.
+std::string Asistencia::getClave(void) const
 {
-   // TODO : implement
+   // Sin hora de franja solo quedan la cédula y la fecha
+   if (horaInicioFranja == nullptr)
+   {
+      return cedulaProfesor + "-" + fecha + "-";
+   }
+   return cedulaProfesor + "-" + fecha + "-" + horaInicioFranja->toString();
 }
