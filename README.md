@@ -44,47 +44,53 @@ Se hacen con expresiones regulares en la clase `Validador`:
 
 ## Estructura del proyecto
 
-Todos los archivos están en la carpeta principal.
+```
+├── include/   archivos .h (declaraciones de las clases)
+├── src/       archivos .cpp (implementación y main.cpp)
+└── tests/     pruebas de unidad y la librería doctest
+```
 
-| Archivo | Descripción |
-|---|---|
-| `IMostrable.h`, `IIdentificable.h`, `IListaDoble.h` | Interfaces |
-| `Nodo.h`, `ListaDoble.h` | Lista doble genérica (templates, solo `.h`) |
-| `Hora` | Guarda una hora como minutos desde medianoche |
-| `Persona`, `Profesor` | Datos del profesor y sus franjas |
-| `FranjaHoraria` | Horario, aula y reglas de la ventana de 10 minutos |
-| `Asistencia` | Registro de entrada y salida |
-| `Validador` | Validaciones con expresiones regulares |
-| `SistemaAsistencia` | Lógica principal del sistema |
-| `Menu` | Interacción con el usuario |
-| `main.cpp` | Punto de entrada |
-| `test_<Clase>.cpp` | Pruebas de unidad de cada clase |
-| `doctest.h` | Librería de pruebas (un solo archivo) |
+| Archivo | Carpeta | Descripción |
+|---|---|---|
+| `IMostrable.h`, `IIdentificable.h`, `IListaDoble.h` | `include/` | Interfaces |
+| `Nodo.h`, `ListaDoble.h` | `include/` | Lista doble genérica (templates, solo `.h`) |
+| `Hora` | `include/` y `src/` | Guarda una hora como minutos desde medianoche |
+| `Persona`, `Profesor` | `include/` y `src/` | Datos del profesor y sus franjas |
+| `FranjaHoraria` | `include/` y `src/` | Horario, aula y reglas de la ventana de 10 minutos |
+| `Asistencia` | `include/` y `src/` | Registro de entrada y salida |
+| `Validador` | `include/` y `src/` | Validaciones con expresiones regulares |
+| `SistemaAsistencia` | `include/` y `src/` | Lógica principal del sistema |
+| `Menu` | `include/` y `src/` | Interacción con el usuario |
+| `main.cpp` | `src/` | Punto de entrada |
+| `test_<Clase>.cpp`, `pruebas_main.cpp` | `tests/` | Pruebas de unidad de cada clase |
+| `doctest.h`, `ElementoPrueba.h` | `tests/` | Librería de pruebas y clase auxiliar para probar la lista |
 
 El diagrama de clases se hizo en PowerDesigner.
 
 ## Cómo compilar y ejecutar
 
-Se necesita `g++` con soporte para C++17. Los comandos se ejecutan en la terminal, dentro de la carpeta del proyecto.
+Se necesita `g++` con soporte para C++17. Los comandos se ejecutan en la terminal, dentro de la carpeta principal del proyecto.
+
+La opción `-Iinclude` le indica al compilador dónde están los `.h`, y `-Itests` dónde está `doctest.h`.
 
 **Programa:**
 
 ```
-g++ -std=c++17 -Wall -Wextra main.cpp Hora.cpp Validador.cpp Persona.cpp FranjaHoraria.cpp Profesor.cpp Asistencia.cpp SistemaAsistencia.cpp Menu.cpp -o asistencia.exe
-./asistencia.exe
+g++ -std=c++17 -Wall -Wextra -Iinclude src/main.cpp src/Hora.cpp src/Validador.cpp src/Persona.cpp src/FranjaHoraria.cpp src/Profesor.cpp src/Asistencia.cpp src/SistemaAsistencia.cpp src/Menu.cpp -o asistencia.exe
+.\asistencia.exe
 ```
 
 **Pruebas de unidad:**
 
 ```
-g++ -std=c++17 -Wall -Wextra pruebas_main.cpp test_*.cpp Hora.cpp Validador.cpp Persona.cpp FranjaHoraria.cpp Profesor.cpp Asistencia.cpp SistemaAsistencia.cpp Menu.cpp -o pruebas.exe
-./pruebas.exe
+g++ -std=c++17 -Wall -Wextra -Iinclude -Itests tests/pruebas_main.cpp tests/test_*.cpp src/Hora.cpp src/Validador.cpp src/Persona.cpp src/FranjaHoraria.cpp src/Profesor.cpp src/Asistencia.cpp src/SistemaAsistencia.cpp src/Menu.cpp -o pruebas.exe
+.\pruebas.exe
 ```
 
 Opciones útiles de las pruebas:
 
-- `./pruebas.exe -s` muestra también las pruebas que pasan.
-- `./pruebas.exe -tc="Hora*"` ejecuta solo las pruebas cuyo nombre empieza con `Hora`.
+- `.\pruebas.exe -s` muestra también las pruebas que pasan.
+- `.\pruebas.exe -tc="Hora*"` ejecuta solo las pruebas cuyo nombre empieza con `Hora`.
 
 ## Uso de la hora y la fecha
 
@@ -92,3 +98,7 @@ Al registrar una entrada o salida, el programa permite:
 
 - Presionar **Enter** para usar la hora y la fecha actuales del sistema.
 - Escribir una hora (`HH:MM`) o fecha (`AAAA-MM-DD`) manualmente, útil para probar las reglas de los 10 minutos.
+
+## Tildes y ñ en la consola de Windows
+
+El programa configura la consola en UTF-8 al iniciar, así que no hace falta ejecutar ningún comando antes.
