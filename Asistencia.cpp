@@ -1,0 +1,221 @@
+/***********************************************************************
+ * Module:  Asistencia.cpp
+ * Author:  gdann
+ * Modified: martes, 3 de noviembre de 2026 10:35:39
+ * Purpose: Implementation of the class Asistencia
+ ***********************************************************************/
+
+#include "Hora.h"
+#include "Profesor.h"
+#include "Asistencia.h"
+
+////////////////////////////////////////////////////////////////////////
+// Name:       Asistencia::Asistencia()
+// Purpose:    Implementation of Asistencia::Asistencia()
+// Return:     
+////////////////////////////////////////////////////////////////////////
+
+Asistencia::Asistencia()
+{
+   hora = NULL;
+   profesor = NULL;
+}
+
+////////////////////////////////////////////////////////////////////////
+// Name:       Asistencia::Asistencia(std::string cedulaProfesor, std::string fecha, Hora* horaInicioFranja)
+// Purpose:    Implementation of Asistencia::Asistencia()
+// Parameters:
+// - cedulaProfesor
+// - fecha
+// - horaInicioFranja
+// Return:     
+////////////////////////////////////////////////////////////////////////
+
+Asistencia::Asistencia(std::string cedulaProfesor, std::string fecha, Hora* horaInicioFranja)
+{
+   // TODO : implement
+}
+
+////////////////////////////////////////////////////////////////////////
+// Name:       Asistencia::~Asistencia()
+// Purpose:    Implementation of Asistencia::~Asistencia()
+// Return:     
+////////////////////////////////////////////////////////////////////////
+
+Asistencia::~Asistencia()
+{
+   // TODO : implement
+}
+
+////////////////////////////////////////////////////////////////////////
+// Name:       Asistencia::getCedulaProfesor()
+// Purpose:    Implementation of Asistencia::getCedulaProfesor()
+// Return:     std::string
+////////////////////////////////////////////////////////////////////////
+
+std::string Asistencia::getCedulaProfesor(void)
+{
+   return cedulaProfesor;
+}
+
+////////////////////////////////////////////////////////////////////////
+// Name:       Asistencia::getFecha()
+// Purpose:    Implementation of Asistencia::getFecha()
+// Return:     std::string
+////////////////////////////////////////////////////////////////////////
+
+std::string Asistencia::getFecha(void)
+{
+   return fecha;
+}
+
+////////////////////////////////////////////////////////////////////////
+// Name:       Asistencia::getHoraEntrada()
+// Purpose:    Implementation of Asistencia::getHoraEntrada()
+// Return:     Hora*
+////////////////////////////////////////////////////////////////////////
+
+Hora* Asistencia::getHoraEntrada(void)
+{
+   return horaEntrada;
+}
+
+////////////////////////////////////////////////////////////////////////
+// Name:       Asistencia::setHoraEntrada(Hora* newHoraEntrada)
+// Purpose:    Implementation of Asistencia::setHoraEntrada()
+// Parameters:
+// - newHoraEntrada
+// Return:     void
+////////////////////////////////////////////////////////////////////////
+
+void Asistencia::setHoraEntrada(Hora* newHoraEntrada)
+{
+   horaEntrada = newHoraEntrada;
+}
+
+////////////////////////////////////////////////////////////////////////
+// Name:       Asistencia::getHoraSalida()
+// Purpose:    Implementation of Asistencia::getHoraSalida()
+// Return:     Hora*
+////////////////////////////////////////////////////////////////////////
+
+Hora* Asistencia::getHoraSalida(void)
+{
+   return horaSalida;
+}
+
+////////////////////////////////////////////////////////////////////////
+// Name:       Asistencia::setHoraSalida(Hora* newHoraSalida)
+// Purpose:    Implementation of Asistencia::setHoraSalida()
+// Parameters:
+// - newHoraSalida
+// Return:     void
+////////////////////////////////////////////////////////////////////////
+
+void Asistencia::setHoraSalida(Hora* newHoraSalida)
+{
+   horaSalida = newHoraSalida;
+}
+
+////////////////////////////////////////////////////////////////////////
+// Name:       Asistencia::getEstado()
+// Purpose:    Implementation of Asistencia::getEstado()
+// Return:     int
+////////////////////////////////////////////////////////////////////////
+
+int Asistencia::getEstado(void)
+{
+   return estado;
+}
+
+////////////////////////////////////////////////////////////////////////
+// Name:       Asistencia::estaSinRegistro()
+// Purpose:    Implementation of Asistencia::estaSinRegistro()
+// Return:     bool
+////////////////////////////////////////////////////////////////////////
+
+bool Asistencia::estaSinRegistro(void)
+{
+   // TODO : implement
+}
+
+////////////////////////////////////////////////////////////////////////
+// Name:       Asistencia::tieneEntrada()
+// Purpose:    Implementation of Asistencia::tieneEntrada()
+// Return:     bool
+////////////////////////////////////////////////////////////////////////
+
+bool Asistencia::tieneEntrada(void)
+{
+   // TODO : implement
+}
+
+////////////////////////////////////////////////////////////////////////
+// Name:       Asistencia::getHoraInicioFranja()
+// Purpose:    Implementation of Asistencia::getHoraInicioFranja()
+// Return:     Hora*
+////////////////////////////////////////////////////////////////////////
+
+Hora* Asistencia::getHoraInicioFranja(void)
+{
+   return horaInicioFranja;
+}
+
+////////////////////////////////////////////////////////////////////////
+// Name:       Asistencia::mostrar()
+// Purpose:    Implementation of Asistencia::mostrar()
+// Return:     void
+////////////////////////////////////////////////////////////////////////
+
+void Asistencia::mostrar(void)
+{
+   // TODO : implement
+}
+
+////////////////////////////////////////////////////////////////////////
+// Name:       Asistencia::estaCompleta()
+// Purpose:    Implementation of Asistencia::estaCompleta()
+// Return:     bool
+////////////////////////////////////////////////////////////////////////
+
+bool Asistencia::estaCompleta(void)
+{
+   // TODO : implement
+}
+
+////////////////////////////////////////////////////////////////////////
+// Name:       Asistencia::registrarEntrada(Hora* hora)
+// Purpose:    Implementation of Asistencia::registrarEntrada()
+// Parameters:
+// - hora
+// Return:     void
+////////////////////////////////////////////////////////////////////////
+
+void Asistencia::registrarEntrada(Hora* hora)
+{
+   // TODO : implement
+}
+
+////////////////////////////////////////////////////////////////////////
+// Name:       Asistencia::registrarSalida(Hora* hora)
+// Purpose:    Implementation of Asistencia::registrarSalida()
+// Parameters:
+// - hora
+// Return:     void
+////////////////////////////////////////////////////////////////////////
+
+void Asistencia::registrarSalida(Hora* hora)
+{
+   // TODO : implement
+}
+
+////////////////////////////////////////////////////////////////////////
+// Name:       Asistencia::getClave()
+// Purpose:    Implementation of Asistencia::getClave()
+// Return:     std::string
+////////////////////////////////////////////////////////////////////////
+
+std::string Asistencia::getClave(void)
+{
+   // TODO : implement
+}
