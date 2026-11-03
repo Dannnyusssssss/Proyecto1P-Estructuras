@@ -17,6 +17,7 @@
 #include <sstream>
 #include <iomanip>
 #include <ctime>
+#include <cstdlib>   // para system(); solo se usa para configurar la consola en Windows
 
 ////////////////////////////////////////////////////////////////////////
 // Name:       Menu::Menu()
@@ -51,6 +52,14 @@ Menu::~Menu()
 // Bucle del menú principal: se repite hasta elegir 0 o hasta que se termine la entrada.
 void Menu::iniciar(void)
 {
+   // Solo se compila en Windows: en otros sistemas el comando chcp no existe
+#ifdef _WIN32
+   // chcp 65001 cambia la página de códigos de la consola a UTF-8,
+   // para que las tildes y la ñ lleguen bien al programa.
+   // "> nul" oculta el mensaje "Página de códigos activa: 65001".
+   system("chcp 65001 > nul");
+#endif
+
    std::string linea;
    while (true)
    {

@@ -92,12 +92,3 @@ Al registrar una entrada o salida, el programa permite:
 
 - Presionar **Enter** para usar la hora y la fecha actuales del sistema.
 - Escribir una hora (`HH:MM`) o fecha (`AAAA-MM-DD`) manualmente, útil para probar las reglas de los 10 minutos.
-
-## Tildes y ñ en la consola de Windows
-
-Para que nombres como "María" o "Ñañez" se lean bien, ejecuta este comando en la terminal
-antes de iniciar el programa:
-
-```
-chcp 65001
-```
