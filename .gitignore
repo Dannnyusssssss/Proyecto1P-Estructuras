@@ -1,0 +1,24 @@
+# Ejecutables y archivos de compilación
+*.exe
+*.o
+*.obj
+*.out
+*.a
+*.pdb
+*.ilk
+
+# Archivos de Visual Studio y Visual Studio Code
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Archivos temporales del sistema y de editores
+*.tmp
+*.log
+*.bak
+*~
+*.swp
+Thumbs.db
+desktop.ini
+.DS_Store
