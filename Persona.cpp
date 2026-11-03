@@ -5,15 +5,20 @@
  * Purpose: Implementation of the class Persona
  ***********************************************************************/
 
+// Archivo: Persona.cpp
+// Contiene la implementación de la clase Persona.
+
 #include "Persona.h"
+#include <iostream>
 
 ////////////////////////////////////////////////////////////////////////
 // Name:       Persona::Persona()
 // Purpose:    Implementation of Persona::Persona()
-// Return:     
+// Return:
 ////////////////////////////////////////////////////////////////////////
 
-Persona::Persona()
+// Deja los tres textos vacíos (std::string ya se inicializa vacío; se escribe explícito por claridad).
+Persona::Persona() : cedula(""), nombre(""), apellido("")
 {
 }
 
@@ -24,12 +29,14 @@ Persona::Persona()
 // - cedula
 // - nombre
 // - apellido
-// Return:     
+// Return:
 ////////////////////////////////////////////////////////////////////////
 
+// Guarda los datos recibidos. En la lista de inicialización, el nombre de afuera es el
+// atributo y el de adentro del paréntesis es el parámetro, aunque se llamen igual.
 Persona::Persona(std::string cedula, std::string nombre, std::string apellido)
+   : cedula(cedula), nombre(nombre), apellido(apellido)
 {
-   // TODO : implement
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -38,7 +45,8 @@ Persona::Persona(std::string cedula, std::string nombre, std::string apellido)
 // Return:     std::string
 ////////////////////////////////////////////////////////////////////////
 
-std::string Persona::getCedula(void)
+// Devuelve la cédula guardada.
+std::string Persona::getCedula(void) const
 {
    return cedula;
 }
@@ -51,6 +59,7 @@ std::string Persona::getCedula(void)
 // Return:     void
 ////////////////////////////////////////////////////////////////////////
 
+// Reemplaza la cédula.
 void Persona::setCedula(std::string newCedula)
 {
    cedula = newCedula;
@@ -62,7 +71,8 @@ void Persona::setCedula(std::string newCedula)
 // Return:     std::string
 ////////////////////////////////////////////////////////////////////////
 
-std::string Persona::getNombre(void)
+// Devuelve el nombre guardado.
+std::string Persona::getNombre(void) const
 {
    return nombre;
 }
@@ -75,6 +85,7 @@ std::string Persona::getNombre(void)
 // Return:     void
 ////////////////////////////////////////////////////////////////////////
 
+// Reemplaza el nombre.
 void Persona::setNombre(std::string newNombre)
 {
    nombre = newNombre;
@@ -86,7 +97,8 @@ void Persona::setNombre(std::string newNombre)
 // Return:     std::string
 ////////////////////////////////////////////////////////////////////////
 
-std::string Persona::getApellido(void)
+// Devuelve el apellido guardado.
+std::string Persona::getApellido(void) const
 {
    return apellido;
 }
@@ -99,6 +111,7 @@ std::string Persona::getApellido(void)
 // Return:     void
 ////////////////////////////////////////////////////////////////////////
 
+// Reemplaza el apellido.
 void Persona::setApellido(std::string newApellido)
 {
    apellido = newApellido;
@@ -110,9 +123,11 @@ void Persona::setApellido(std::string newApellido)
 // Return:     std::string
 ////////////////////////////////////////////////////////////////////////
 
-std::string Persona::getClave(void)
+// La cédula identifica de forma única a la persona, por eso es su clave
+// en la ListaDoble (sección 4, tabla de claves).
+std::string Persona::getClave(void) const
 {
-   // TODO : implement
+   return cedula;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -121,7 +136,8 @@ std::string Persona::getClave(void)
 // Return:     void
 ////////////////////////////////////////////////////////////////////////
 
-void Persona::mostrar(void)
+// Imprime los datos de la persona en una línea.
+void Persona::mostrar(void) const
 {
-   // TODO : implement
+   std::cout << "Cédula: " << cedula << " | Nombre: " << nombre << " " << apellido << std::endl;
 }
