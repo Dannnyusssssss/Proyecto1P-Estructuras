@@ -5,7 +5,12 @@
  * Purpose: Implementation of the class Hora
  ***********************************************************************/
 
+// Archivo: Hora.cpp
+// Contiene la implementación de la clase Hora.
+
 #include "Hora.h"
+#include <sstream>
+#include <iomanip>
 
 ////////////////////////////////////////////////////////////////////////
 // Name:       Hora::Hora(int horas, int minutos)
@@ -13,12 +18,23 @@
 // Parameters:
 // - horas
 // - minutos
-// Return:     
+// Return:
 ////////////////////////////////////////////////////////////////////////
 
+// Construye la hora a partir de horas y minutos sueltos.
+// Si las horas no están entre 0 y 23 o los minutos entre 0 y 59, queda en 00:00.
 Hora::Hora(int horas, int minutos)
 {
-   // TODO : implement
+   // Rango inválido: se usa 00:00 como valor seguro en lugar de guardar una hora imposible
+   if (horas < 0 || horas > 23 || minutos < 0 || minutos > 59)
+   {
+      this->minutos = 0;
+   }
+   else
+   {
+      // this->minutos es el atributo; minutos (sin this) es el parámetro
+      this->minutos = horas * 60 + minutos;
+   }
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -26,12 +42,30 @@ Hora::Hora(int horas, int minutos)
 // Purpose:    Implementation of Hora::Hora()
 // Parameters:
 // - hhmm
-// Return:     
+// Return:
 ////////////////////////////////////////////////////////////////////////
 
+// Construye la hora a partir de un texto "HH:MM" ya validado por el Validador.
+// Aquí no se arma ninguna regex: solo se separan los números con un stringstream.
 Hora::Hora(std::string hhmm)
 {
-   // TODO : implement
+   std::istringstream entrada(hhmm);
+   int horas = -1;        // valor inválido por defecto, por si la lectura falla
+   int mins = -1;         // valor inválido por defecto, por si la lectura falla
+   char separador = ' ';  // debe terminar siendo ':'
+
+   // Se leen: número, separador y número. Si algo falla, el stream queda en estado de error
+   entrada >> horas >> separador >> mins;
+
+   // Texto ilegible, separador distinto de ':' o valores fuera de rango: queda en 00:00
+   if (entrada.fail() || separador != ':' || horas < 0 || horas > 23 || mins < 0 || mins > 59)
+   {
+      minutos = 0;
+   }
+   else
+   {
+      minutos = horas * 60 + mins;
+   }
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -40,9 +74,10 @@ Hora::Hora(std::string hhmm)
 // Return:     int
 ////////////////////////////////////////////////////////////////////////
 
-int Hora::getHoras(void)
+// Devuelve la parte de las horas: la división entera descarta los minutos sobrantes.
+int Hora::getHoras(void) const
 {
-   // TODO : implement
+   return minutos / 60;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -51,9 +86,10 @@ int Hora::getHoras(void)
 // Return:     int
 ////////////////////////////////////////////////////////////////////////
 
-int Hora::getMinutos(void)
+// Devuelve la parte de los minutos: el resto de dividir para 60.
+int Hora::getMinutos(void) const
 {
-   // TODO : implement
+   return minutos % 60;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -62,9 +98,10 @@ int Hora::getMinutos(void)
 // Return:     int
 ////////////////////////////////////////////////////////////////////////
 
-int Hora::getTotalMinutos(void)
+// Devuelve los minutos desde la medianoche, tal como se guardan.
+int Hora::getTotalMinutos(void) const
 {
-   // TODO : implement
+   return minutos;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -75,9 +112,15 @@ int Hora::getTotalMinutos(void)
 // Return:     bool
 ////////////////////////////////////////////////////////////////////////
 
-bool Hora::esMayorIgual(Hora* otra)
+// Compara esta hora con otra. Solo consulta otra: no la libera ni la guarda.
+bool Hora::esMayorIgual(Hora* otra) const
 {
-   // TODO : implement
+   // Sin otra hora no hay con qué comparar
+   if (otra == nullptr)
+   {
+      return false;
+   }
+   return minutos >= otra->getTotalMinutos();
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -88,9 +131,15 @@ bool Hora::esMayorIgual(Hora* otra)
 // Return:     bool
 ////////////////////////////////////////////////////////////////////////
 
-bool Hora::esMenorIgual(Hora* otra)
+// Compara esta hora con otra. Solo consulta otra: no la libera ni la guarda.
+bool Hora::esMenorIgual(Hora* otra) const
 {
-   // TODO : implement
+   // Sin otra hora no hay con qué comparar
+   if (otra == nullptr)
+   {
+      return false;
+   }
+   return minutos <= otra->getTotalMinutos();
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -101,9 +150,19 @@ bool Hora::esMenorIgual(Hora* otra)
 // Return:     Hora*
 ////////////////////////////////////////////////////////////////////////
 
-Hora* Hora::sumarMinutos(int min)
+// Crea una hora nueva desplazada min minutos. La original no cambia.
+// Se usa para calcular el fin de las ventanas: horaInicio + 10 y horaFinal + 10.
+Hora* Hora::sumarMinutos(int min) const
 {
-   // TODO : implement
+   const int minutosPorDia = 24 * 60;   // 1440 minutos tiene un día
+
+   // El primer % deja el valor entre -1439 y 1439; sumar 1440 y aplicar % otra vez
+   // lo lleva siempre a 0..1439, así funciona también con min negativo.
+   // Ejemplo: 23:55 (1435) + 10 = 1445 -> 1445 % 1440 = 5 -> 00:05
+   int total = ((minutos + min) % minutosPorDia + minutosPorDia) % minutosPorDia;
+
+   // Se devuelve un objeto nuevo en el heap; quien lo recibe es su dueño y debe hacer delete
+   return new Hora(total / 60, total % 60);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -112,7 +171,12 @@ Hora* Hora::sumarMinutos(int min)
 // Return:     std::string
 ////////////////////////////////////////////////////////////////////////
 
-std::string Hora::toString(void)
+// Arma el texto "HH:MM". setw(2) con setfill('0') agrega el cero a la izquierda (7 -> "07").
+std::string Hora::toString(void) const
 {
-   // TODO : implement
+   std::ostringstream salida;
+   salida << std::setw(2) << std::setfill('0') << getHoras()
+          << ":"
+          << std::setw(2) << std::setfill('0') << getMinutos();
+   return salida.str();
 }
