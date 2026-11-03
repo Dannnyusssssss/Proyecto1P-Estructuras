@@ -17,7 +17,7 @@
 ////////////////////////////////////////////////////////////////////////
 // Name:       SistemaAsistencia::SistemaAsistencia()
 // Purpose:    Implementation of SistemaAsistencia::SistemaAsistencia()
-// Return:
+// Return:     
 ////////////////////////////////////////////////////////////////////////
 
 // Crea las dos listas vacías con new; el sistema es su dueño.
@@ -29,7 +29,7 @@ SistemaAsistencia::SistemaAsistencia()
 ////////////////////////////////////////////////////////////////////////
 // Name:       SistemaAsistencia::~SistemaAsistencia()
 // Purpose:    Implementation of SistemaAsistencia::~SistemaAsistencia()
-// Return:
+// Return:     
 ////////////////////////////////////////////////////////////////////////
 
 // Al borrar cada lista, su destructor libera los objetos que contiene:
@@ -262,15 +262,17 @@ void SistemaAsistencia::mostrarAsistencias(void) const
 void SistemaAsistencia::mostrarAsistenciaProfesor(std::string cedula) const
 {
    bool encontro = false;   // indica si se mostró al menos una asistencia
-   Nodo<Asistencia>* actual = asistencias->getCabeza();
-   while (actual != nullptr)
+
+   // Se recorre con getTamanio() y obtener(i), métodos de la interfaz IListaDoble
+   // (getCabeza/getCola existen solo para las pruebas de la lista, decisión 16)
+   for (int i = 0; i < asistencias->getTamanio(); i++)
    {
-      if (actual->getDato()->getCedulaProfesor() == cedula)
+      Asistencia* asistencia = asistencias->obtener(i);
+      if (asistencia->getCedulaProfesor() == cedula)
       {
-         actual->getDato()->mostrar();
+         asistencia->mostrar();
          encontro = true;
       }
-      actual = actual->getSiguiente();
    }
 
    if (!encontro)

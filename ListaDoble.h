@@ -69,6 +69,11 @@ public:
    // Con la lista vacía no imprime nada; el mensaje lo decide quien llama.
    void mostrarTodos(void) const override;
 
+   // getCabeza() y getCola() se agregaron al modelo (decisión 16) SOLO para que las pruebas
+   // puedan recorrer los enlaces hacia adelante y hacia atrás. El código del sistema no los usa:
+   // recorre la lista con getTamanio() y obtener(), que son parte de la interfaz.
+   // No tienen setters: desde afuera no se puede cambiar la estructura de la lista.
+
    // Devuelve el primer nodo (nullptr si la lista está vacía).
    // Permite recorrer la lista hacia adelante con getSiguiente(). No se deben liberar los nodos.
    Nodo<T>* getCabeza(void) const;

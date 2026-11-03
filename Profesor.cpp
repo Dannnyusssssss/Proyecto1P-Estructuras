@@ -15,7 +15,7 @@
 ////////////////////////////////////////////////////////////////////////
 // Name:       Profesor::Profesor()
 // Purpose:    Implementation of Profesor::Profesor()
-// Return:
+// Return:     
 ////////////////////////////////////////////////////////////////////////
 
 // Profesor sin datos: Persona() deja los textos vacíos y se crea la lista de franjas vacía.
@@ -30,7 +30,7 @@ Profesor::Profesor() : Persona(), franjas(new ListaDoble<FranjaHoraria>())
 // - cedula
 // - nombre
 // - apellido
-// Return:
+// Return:     
 ////////////////////////////////////////////////////////////////////////
 
 // Los datos personales los guarda Persona; aquí solo se crea la lista propia de franjas.
@@ -42,7 +42,7 @@ Profesor::Profesor(std::string cedula, std::string nombre, std::string apellido)
 ////////////////////////////////////////////////////////////////////////
 // Name:       Profesor::~Profesor()
 // Purpose:    Implementation of Profesor::~Profesor()
-// Return:
+// Return:     
 ////////////////////////////////////////////////////////////////////////
 
 // Al borrar la lista, su destructor libera cada FranjaHoraria, y cada franja libera sus horas.
@@ -126,10 +126,11 @@ bool Profesor::agregarFranja(FranjaHoraria* franja)
    // alineadas cada 2 horas, dos franjas predefinidas distintas no pueden solaparse, y la única
    // forma de "cruce" (la misma franja) ya la rechaza la validación 4. Se deja por si algún día
    // cambian los bloques horarios; por eso no tiene una prueba de unidad propia.
-   Nodo<FranjaHoraria>* actual = franjas->getCabeza();
-   while (actual != nullptr)
+   // Se recorre con getTamanio() y obtener(i), métodos de la interfaz IListaDoble
+   // (getCabeza/getCola existen solo para las pruebas de la lista, decisión 16)
+   for (int i = 0; i < franjas->getTamanio(); i++)
    {
-      FranjaHoraria* existente = actual->getDato();
+      FranjaHoraria* existente = franjas->obtener(i);
       // Dos intervalos se cruzan si cada uno empieza antes de que el otro termine.
       // Se usa < estricto para que franjas consecutivas (7-9 y 9-11) no cuenten como cruce
       bool seCruzan = inicio->getTotalMinutos() < existente->getHoraFinal()->getTotalMinutos()
@@ -138,7 +139,6 @@ bool Profesor::agregarFranja(FranjaHoraria* franja)
       {
          return false;
       }
-      actual = actual->getSiguiente();
    }
 
    // Todas las validaciones pasaron: desde aquí la lista del profesor es dueña de la franja
@@ -163,15 +163,15 @@ FranjaHoraria* Profesor::buscarFranjaParaEntrada(Hora* hora) const
       return nullptr;
    }
 
-   Nodo<FranjaHoraria>* actual = franjas->getCabeza();
-   while (actual != nullptr)
+   // Recorrido con la interfaz de la lista: un profesor tiene como máximo 7 franjas
+   for (int i = 0; i < franjas->getTamanio(); i++)
    {
+      FranjaHoraria* franja = franjas->obtener(i);
       // La franja decide si la hora está en [inicio, inicio + 10]
-      if (actual->getDato()->puedeRegistrarEntrada(hora))
+      if (franja->puedeRegistrarEntrada(hora))
       {
-         return actual->getDato();   // sigue siendo del profesor; quien la recibe no la libera
+         return franja;   // sigue siendo del profesor; quien la recibe no la libera
       }
-      actual = actual->getSiguiente();
    }
    // Ninguna franja acepta la entrada a esa hora (o el profesor no tiene franjas)
    return nullptr;
@@ -196,15 +196,15 @@ FranjaHoraria* Profesor::buscarFranjaParaSalida(Hora* hora) const
       return nullptr;
    }
 
-   Nodo<FranjaHoraria>* actual = franjas->getCabeza();
-   while (actual != nullptr)
+   // Recorrido con la interfaz de la lista: un profesor tiene como máximo 7 franjas
+   for (int i = 0; i < franjas->getTamanio(); i++)
    {
+      FranjaHoraria* franja = franjas->obtener(i);
       // La franja decide si la hora está en [final, final + 10]
-      if (actual->getDato()->puedeRegistrarSalida(hora))
+      if (franja->puedeRegistrarSalida(hora))
       {
-         return actual->getDato();   // sigue siendo del profesor; quien la recibe no la libera
+         return franja;   // sigue siendo del profesor; quien la recibe no la libera
       }
-      actual = actual->getSiguiente();
    }
    // Ninguna franja acepta la salida a esa hora (o el profesor no tiene franjas)
    return nullptr;
@@ -228,11 +228,9 @@ void Profesor::mostrar(void) const
    }
 
    // No se usa mostrarTodos() porque cada franja debe ir con sangría
-   Nodo<FranjaHoraria>* actual = franjas->getCabeza();
-   while (actual != nullptr)
+   for (int i = 0; i < franjas->getTamanio(); i++)
    {
       std::cout << "  ";
-      actual->getDato()->mostrar();
-      actual = actual->getSiguiente();
+      franjas->obtener(i)->mostrar();
    }
 }

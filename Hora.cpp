@@ -18,7 +18,7 @@
 // Parameters:
 // - horas
 // - minutos
-// Return:
+// Return:     
 ////////////////////////////////////////////////////////////////////////
 
 // Construye la hora a partir de horas y minutos sueltos.
@@ -42,7 +42,7 @@ Hora::Hora(int horas, int minutos)
 // Purpose:    Implementation of Hora::Hora()
 // Parameters:
 // - hhmm
-// Return:
+// Return:     
 ////////////////////////////////////////////////////////////////////////
 
 // Construye la hora a partir de un texto "HH:MM" ya validado por el Validador.

@@ -15,7 +15,7 @@
 ////////////////////////////////////////////////////////////////////////
 // Name:       FranjaHoraria::FranjaHoraria()
 // Purpose:    Implementation of FranjaHoraria::FranjaHoraria()
-// Return:
+// Return:     
 ////////////////////////////////////////////////////////////////////////
 
 // Franja vacía: los punteros se dejan en nullptr para que el destructor pueda hacer
@@ -33,7 +33,7 @@ FranjaHoraria::FranjaHoraria()
 // - horaFinal
 // - aula
 // - cedulaProfesor
-// Return:
+// Return:     
 ////////////////////////////////////////////////////////////////////////
 
 // Se guardan los MISMOS punteros recibidos (sin new): desde aquí la franja es su dueña.
@@ -45,7 +45,7 @@ FranjaHoraria::FranjaHoraria(Hora * horaInicio, Hora* horaFinal, std::string aul
 ////////////////////////////////////////////////////////////////////////
 // Name:       FranjaHoraria::~FranjaHoraria()
 // Purpose:    Implementation of FranjaHoraria::~FranjaHoraria()
-// Return:
+// Return:     
 ////////////////////////////////////////////////////////////////////////
 
 // Libera las dos horas, de las que la franja es dueña.

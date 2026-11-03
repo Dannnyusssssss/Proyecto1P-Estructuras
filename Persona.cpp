@@ -14,7 +14,7 @@
 ////////////////////////////////////////////////////////////////////////
 // Name:       Persona::Persona()
 // Purpose:    Implementation of Persona::Persona()
-// Return:
+// Return:     
 ////////////////////////////////////////////////////////////////////////
 
 // Deja los tres textos vacíos (std::string ya se inicializa vacío; se escribe explícito por claridad).
@@ -29,7 +29,7 @@ Persona::Persona() : cedula(""), nombre(""), apellido("")
 // - cedula
 // - nombre
 // - apellido
-// Return:
+// Return:     
 ////////////////////////////////////////////////////////////////////////
 
 // Guarda los datos recibidos. En la lista de inicialización, el nombre de afuera es el

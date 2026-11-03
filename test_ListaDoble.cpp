@@ -92,7 +92,7 @@ TEST_CASE("ListaDoble_constructor_listaNueva")
 }
 
 // Verifica que estaVacia y getTamanio cambien al insertar y al eliminar.
-TEST_CASE("ListaDoble_estaVacia_getTamanio_cambios")
+TEST_CASE("ListaDoble_estaVaciaGetTamanio_cambios")
 {
    ListaDoble<ElementoPrueba>* lista = new ListaDoble<ElementoPrueba>();
    lista->insertarFinal(new ElementoPrueba("A"));
@@ -200,6 +200,23 @@ TEST_CASE("ListaDoble_insertar_mezclado")
    lista->insertarFinal(new ElementoPrueba("C"));
    lista->insertarInicio(new ElementoPrueba("D"));
    CHECK(RecorridoLista::adelante(lista) == "D,B,A,C");
+   delete lista;
+}
+
+// Verifica la decisión 14: la lista NO revisa claves duplicadas, inserta ambas.
+// Rechazar duplicados es regla de negocio de Profesor y SistemaAsistencia, no de la lista.
+// buscar y eliminar actúan sobre la primera coincidencia.
+TEST_CASE("ListaDoble_insertarFinal_claveRepetidaSeAcepta")
+{
+   ListaDoble<ElementoPrueba>* lista = new ListaDoble<ElementoPrueba>();
+   ElementoPrueba* primero = new ElementoPrueba("A");
+   lista->insertarFinal(primero);
+   lista->insertarFinal(new ElementoPrueba("A"));
+   CHECK(lista->getTamanio() == 2);
+   CHECK(lista->buscar("A") == primero);   // devuelve la primera coincidencia
+   CHECK(lista->eliminar("A") == true);    // elimina solo la primera
+   CHECK(lista->getTamanio() == 1);
+   CHECK(lista->buscar("A") != nullptr);   // la segunda sigue en la lista
    delete lista;
 }
 
@@ -477,6 +494,25 @@ TEST_CASE("ListaDoble_destructor_listaLlena")
    CHECK(ElementoPrueba::getVivos() == vivosAntes + 3);
    delete lista;
    CHECK(ElementoPrueba::getVivos() == vivosAntes);
+   // Ninguna prueba deja elementos sin liberar, así que el contador vuelve exactamente a 0
+   CHECK(ElementoPrueba::getVivos() == 0);
+}
+
+// Verifica que eliminar todos los elementos uno por uno deje en 0 los objetos vivos:
+// cada eliminar libera su dato, no solo el nodo.
+TEST_CASE("ListaDoble_eliminar_todosDejaCeroVivos")
+{
+   ListaDoble<ElementoPrueba>* lista = new ListaDoble<ElementoPrueba>();
+   lista->insertarFinal(new ElementoPrueba("A"));
+   lista->insertarFinal(new ElementoPrueba("B"));
+   lista->insertarFinal(new ElementoPrueba("C"));
+   CHECK(ElementoPrueba::getVivos() == 3);
+   lista->eliminar("B");
+   lista->eliminar("A");
+   lista->eliminar("C");
+   CHECK(ElementoPrueba::getVivos() == 0);
+   delete lista;
+   CHECK(ElementoPrueba::getVivos() == 0);
 }
 
 // Verifica que la lista también se pueda usar y destruir a través de la interfaz IListaDoble<T>.

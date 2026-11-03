@@ -15,7 +15,7 @@
 ////////////////////////////////////////////////////////////////////////
 // Name:       Asistencia::Asistencia()
 // Purpose:    Implementation of Asistencia::Asistencia()
-// Return:
+// Return:     
 ////////////////////////////////////////////////////////////////////////
 
 // Asistencia vacía: punteros en nullptr para que el destructor pueda hacer delete sin riesgo.
@@ -32,7 +32,7 @@ Asistencia::Asistencia()
 // - cedulaProfesor
 // - fecha
 // - horaInicioFranja
-// Return:
+// Return:     
 ////////////////////////////////////////////////////////////////////////
 
 // Guarda los datos y una copia de la hora de la franja. Todavía no hay entrada ni salida.
@@ -52,7 +52,7 @@ Asistencia::Asistencia(std::string cedulaProfesor, std::string fecha, Hora* hora
 ////////////////////////////////////////////////////////////////////////
 // Name:       Asistencia::~Asistencia()
 // Purpose:    Implementation of Asistencia::~Asistencia()
-// Return:
+// Return:     
 ////////////////////////////////////////////////////////////////////////
 
 // Libera las tres horas, de las que la asistencia es dueña (delete de nullptr no hace nada).
