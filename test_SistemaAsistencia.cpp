@@ -480,3 +480,55 @@ TEST_CASE("SistemaAsistencia_mostrarAsistenciaProfesor_sinRegistros")
    CHECK(impreso == "No hay asistencias registradas para la cédula 1710034065.\n");
    delete sistema;
 }
+
+// ---------------------------------------------------------------------
+// mostrarProfesores
+// ---------------------------------------------------------------------
+
+// Verifica el mensaje cuando no hay profesores registrados.
+TEST_CASE("SistemaAsistencia_mostrarProfesores_vacio")
+{
+   SistemaAsistencia* sistema = new SistemaAsistencia();
+   std::string impreso;
+   {
+      CapturaSalidaSistema captura;
+      sistema->mostrarProfesores();
+      impreso = captura.texto();
+   }
+   CHECK(impreso == "No hay profesores registrados.\n");
+   delete sistema;
+}
+
+// Verifica que se muestren todos los profesores en orden de registro, cada uno con sus franjas
+// (o "Sin franjas asignadas"), usando el formato de Profesor::mostrar().
+TEST_CASE("SistemaAsistencia_mostrarProfesores_conProfesores")
+{
+   SistemaAsistencia* sistema = AyudaSistema::sistemaConFranja();
+   AyudaSistema::agregarProfesor(sistema, "0926687856", "Ana", "López");
+   std::string impreso;
+   {
+      CapturaSalidaSistema captura;
+      sistema->mostrarProfesores();
+      impreso = captura.texto();
+   }
+   CHECK(impreso == "Cédula: 1710034065 | Nombre: Juan Pérez\n"
+                    "  07:00 - 09:00 | Aula: A-101\n"
+                    "Cédula: 0926687856 | Nombre: Ana López\n"
+                    "  Sin franjas asignadas\n");
+   delete sistema;
+}
+
+// Verifica que un profesor rechazado no aparezca en la lista.
+TEST_CASE("SistemaAsistencia_mostrarProfesores_noIncluyeRechazados")
+{
+   SistemaAsistencia* sistema = new SistemaAsistencia();
+   AyudaSistema::agregarProfesor(sistema, "1710034066", "Juan", "Pérez");   // verificador incorrecto
+   std::string impreso;
+   {
+      CapturaSalidaSistema captura;
+      sistema->mostrarProfesores();
+      impreso = captura.texto();
+   }
+   CHECK(impreso == "No hay profesores registrados.\n");
+   delete sistema;
+}

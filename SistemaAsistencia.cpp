@@ -278,3 +278,16 @@ void SistemaAsistencia::mostrarAsistenciaProfesor(std::string cedula) const
       std::cout << "No hay asistencias registradas para la cédula " << cedula << "." << std::endl;
    }
 }
+
+// Agregado al modelo (decisión 10, aprobada en la Fase 11).
+// Muestra cada profesor registrado; Profesor::mostrar() incluye sus franjas con sangría,
+// lo que ayuda al administrador a ver las cédulas antes de asignar una franja.
+void SistemaAsistencia::mostrarProfesores(void) const
+{
+   if (profesores->estaVacia())
+   {
+      std::cout << "No hay profesores registrados." << std::endl;
+      return;
+   }
+   profesores->mostrarTodos();
+}

@@ -74,6 +74,10 @@ public:
    // Muestra las asistencias de esa cédula, o un mensaje si no tiene ninguna.
    void mostrarAsistenciaProfesor(std::string cedula) const;
 
+   // Agregado al modelo (decisión 10, aprobada en la Fase 11): muestra cada profesor con
+   // sus franjas, o "No hay profesores registrados." si no hay ninguno.
+   void mostrarProfesores(void) const;
+
 protected:
 private:
    ListaDoble<Profesor>* profesores;      // profesores registrados (el sistema es dueño de la lista)
