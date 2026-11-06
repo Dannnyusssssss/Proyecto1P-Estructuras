@@ -489,6 +489,89 @@ TEST_CASE("SistemaAsistencia_registrarSalida_datosInvalidos")
 }
 
 // ---------------------------------------------------------------------
+// Fines de semana (decisión 26)
+// En todas estas pruebas el profesor, la franja y la hora son válidos: el único motivo
+// de rechazo posible es el día de la semana.
+// ---------------------------------------------------------------------
+
+// Verifica que se rechace la entrada en sábado (2026-11-07) aunque la hora esté en la ventana,
+// y que el rechazo no deje creada ninguna asistencia.
+TEST_CASE("SistemaAsistencia_registrarEntrada_sabado")
+{
+   SistemaAsistencia* sistema = AyudaSistema::sistemaConFranja();
+   CHECK(AyudaSistema::entrada(sistema, "1710034065", "2026-11-07", "07:05") == false);
+   std::string impreso;
+   {
+      CapturaSalidaSistema captura;
+      sistema->mostrarAsistencias();
+      impreso = captura.texto();
+   }
+   CHECK(impreso == "No hay asistencias registradas.\n");
+   delete sistema;
+}
+
+// Verifica que se rechace la entrada en domingo (2026-11-08) y que no se cree ninguna asistencia.
+TEST_CASE("SistemaAsistencia_registrarEntrada_domingo")
+{
+   SistemaAsistencia* sistema = AyudaSistema::sistemaConFranja();
+   CHECK(AyudaSistema::entrada(sistema, "1710034065", "2026-11-08", "07:05") == false);
+   std::string impreso;
+   {
+      CapturaSalidaSistema captura;
+      sistema->mostrarAsistencias();
+      impreso = captura.texto();
+   }
+   CHECK(impreso == "No hay asistencias registradas.\n");
+   delete sistema;
+}
+
+// Verifica que la entrada en lunes (2026-11-09), con los mismos datos, sí se acepte:
+// demuestra que el rechazo de las pruebas anteriores se debe solo al fin de semana.
+TEST_CASE("SistemaAsistencia_registrarEntrada_lunes")
+{
+   SistemaAsistencia* sistema = AyudaSistema::sistemaConFranja();
+   CHECK(AyudaSistema::entrada(sistema, "1710034065", "2026-11-09", "07:05") == true);
+   delete sistema;
+}
+
+// Verifica que se rechace la salida en sábado y en domingo, y que no se cree ninguna asistencia.
+// Como en fin de semana no puede haber entrada, se intenta la salida directamente.
+TEST_CASE("SistemaAsistencia_registrarSalida_finDeSemanaSinAsistencias")
+{
+   SistemaAsistencia* sistema = AyudaSistema::sistemaConFranja();
+   CHECK(AyudaSistema::salida(sistema, "1710034065", "2026-11-07", "09:05") == false);   // sábado
+   CHECK(AyudaSistema::salida(sistema, "1710034065", "2026-11-08", "09:05") == false);   // domingo
+   std::string impreso;
+   {
+      CapturaSalidaSistema captura;
+      sistema->mostrarAsistencias();
+      impreso = captura.texto();
+   }
+   CHECK(impreso == "No hay asistencias registradas.\n");
+   delete sistema;
+}
+
+// Verifica que, con una entrada registrada el viernes (2026-11-06), las salidas del sábado y del
+// domingo se rechacen sin modificar la asistencia del viernes, que sigue esperando su salida.
+TEST_CASE("SistemaAsistencia_registrarSalida_finDeSemanaNoModifica")
+{
+   SistemaAsistencia* sistema = AyudaSistema::sistemaConFranja();
+   CHECK(AyudaSistema::entrada(sistema, "1710034065", "2026-11-06", "07:05") == true);   // viernes
+   CHECK(AyudaSistema::salida(sistema, "1710034065", "2026-11-07", "09:05") == false);   // sábado
+   CHECK(AyudaSistema::salida(sistema, "1710034065", "2026-11-08", "09:05") == false);   // domingo
+   std::string impreso;
+   {
+      CapturaSalidaSistema captura;
+      sistema->mostrarAsistencias();
+      impreso = captura.texto();
+   }
+   // Solo existe la asistencia del viernes, todavía con la entrada y sin salida
+   CHECK(impreso == "2026-11-06 | Cédula: 1710034065 | Franja: 07:00 | Entrada: 07:05 | "
+                    "Salida: --:-- | Estado: Entrada registrada\n");
+   delete sistema;
+}
+
+// ---------------------------------------------------------------------
 // Flujo completo
 // ---------------------------------------------------------------------
 

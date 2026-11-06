@@ -248,3 +248,42 @@ TEST_CASE("Validador_validarOpcionMenu_vacia")
 {
    CHECK(Validador::validarOpcionMenu("") == false);
 }
+
+// ---------------------------------------------------------------------
+// esFinDeSemana (decisión 26)
+// ---------------------------------------------------------------------
+
+// Verifica que se reconozcan sábados y domingos, incluidos casos especiales del calendario:
+// 2026-11-07 es sábado y 2026-11-08 domingo; 2000-01-01 fue sábado (año múltiplo de 400);
+// 2100-02-28 es domingo (año de siglo no bisiesto); 1969-07-20 fue domingo (fecha anterior a 1970,
+// donde las funciones de <ctime> fallan en Windows).
+TEST_CASE("Validador_esFinDeSemana_sabadosYDomingos")
+{
+   CHECK(Validador::esFinDeSemana("2026-11-07") == true);   // sábado
+   CHECK(Validador::esFinDeSemana("2026-11-08") == true);   // domingo
+   CHECK(Validador::esFinDeSemana("2000-01-01") == true);   // sábado
+   CHECK(Validador::esFinDeSemana("2100-02-28") == true);   // domingo
+   CHECK(Validador::esFinDeSemana("1969-07-20") == true);   // domingo
+}
+
+// Verifica que los días de lunes a viernes no se consideren fin de semana, incluidos los límites
+// alrededor del fin de semana (viernes 2026-11-06 y lunes 2026-11-09) y fechas cercanas al
+// 29 de febrero, donde el ajuste de enero y febrero del algoritmo es delicado.
+TEST_CASE("Validador_esFinDeSemana_diasHabiles")
+{
+   CHECK(Validador::esFinDeSemana("2026-11-06") == false);   // viernes
+   CHECK(Validador::esFinDeSemana("2026-11-09") == false);   // lunes
+   CHECK(Validador::esFinDeSemana("2026-11-05") == false);   // jueves
+   CHECK(Validador::esFinDeSemana("2024-02-29") == false);   // jueves, día bisiesto
+   CHECK(Validador::esFinDeSemana("2028-02-29") == false);   // martes, día bisiesto
+   CHECK(Validador::esFinDeSemana("2100-03-01") == false);   // lunes, tras un febrero de 28 días
+}
+
+// Verifica que una fecha inválida devuelva false: un mes inexistente, el orden invertido
+// y el texto vacío no pasan validarFecha, así que no pueden ser fin de semana.
+TEST_CASE("Validador_esFinDeSemana_fechasInvalidas")
+{
+   CHECK(Validador::esFinDeSemana("2026-13-01") == false);
+   CHECK(Validador::esFinDeSemana("03-11-2026") == false);
+   CHECK(Validador::esFinDeSemana("") == false);
+}

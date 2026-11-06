@@ -224,3 +224,51 @@ bool Validador::validarOpcionMenu(std::string opcion)
    static const std::regex patron(R"(^\d{1,2}$)");
    return std::regex_match(opcion, patron);
 }
+
+////////////////////////////////////////////////////////////////////////
+// Name:       Validador::esFinDeSemana(std::string fecha)
+// Purpose:    Implementation of Validador::esFinDeSemana()
+// Parameters:
+// - fecha
+// Return:     bool
+////////////////////////////////////////////////////////////////////////
+
+// Indica si una fecha válida cae en sábado o domingo.
+// El día de la semana se calcula con aritmética (algoritmo de Sakamoto) porque una regex
+// no puede hacerlo, y no se usa <ctime> porque mktime falla en Windows con fechas anteriores a 1970.
+bool Validador::esFinDeSemana(std::string fecha)
+{
+   // Paso 1 - La fecha debe existir en el calendario; una fecha inválida no es fin de semana
+   if (!validarFecha(fecha))
+   {
+      return false;
+   }
+
+   // Paso 2 - Separar año, mes y día. validarFecha garantizó el formato AAAA-MM-DD,
+   // así que las posiciones son fijas y stoi no falla
+   int anio = std::stoi(fecha.substr(0, 4));   // caracteres 0-3: año
+   int mes = std::stoi(fecha.substr(5, 2));    // caracteres 5-6: mes (1 a 12)
+   int dia = std::stoi(fecha.substr(8, 2));    // caracteres 8-9: día del mes
+
+   // Paso 3 - Tabla de desplazamiento de cada mes (arreglo simple de C++, no std::array).
+   // Cada valor corrige cuántos días de la semana se "corre" el primer día de ese mes
+   int tabla[12] = {0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4};
+
+   // Paso 4 - Enero y febrero se cuentan como parte del año anterior,
+   // así el día bisiesto (29 de febrero) queda al final del año y no altera los meses siguientes
+   if (mes < 3)
+   {
+      anio = anio - 1;
+   }
+
+   // Paso 5 - Fórmula de Sakamoto:
+   //  - anio: cada año común corre el día de la semana en 1
+   //  - anio / 4 - anio / 100 + anio / 400: un día extra por cada año bisiesto transcurrido
+   //  - tabla[mes - 1]: desplazamiento del mes (el arreglo empieza en 0)
+   //  - dia: el día dentro del mes
+   // El resto de dividir entre 7 da el día de la semana: 0 = domingo, 1 = lunes, ... , 6 = sábado
+   int diaSemana = (anio + anio / 4 - anio / 100 + anio / 400 + tabla[mes - 1] + dia) % 7;
+
+   // Paso 6 - Fin de semana: domingo (0) o sábado (6)
+   return diaSemana == 0 || diaSemana == 6;
+}

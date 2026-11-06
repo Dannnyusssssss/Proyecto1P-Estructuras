@@ -163,10 +163,18 @@ bool SistemaAsistencia::agregarFranja(std::string cedula, FranjaHoraria* fra)
 
 // Registra la entrada si la hora cae en la ventana de entrada de alguna franja del profesor
 // y todavía no existe la asistencia de esa franja y esa fecha.
+// Devuelve false sin crear nada si la fecha cae en sábado o domingo.
 bool SistemaAsistencia::registrarEntrada(std::string cedula, std::string fecha, Hora* hora)
 {
    // La fecha debe ser AAAA-MM-DD y existir en el calendario; sin hora no hay nada que comparar
    if (!Validador::validarFecha(fecha) || hora == nullptr)
+   {
+      return false;
+   }
+
+   // Sábados y domingos no hay clases: se rechaza antes de buscar o crear cualquier asistencia,
+   // así el rechazo no deja nada a medias. La fecha llega como parámetro (no se lee el reloj)
+   if (Validador::esFinDeSemana(fecha))
    {
       return false;
    }
@@ -217,10 +225,18 @@ bool SistemaAsistencia::registrarEntrada(std::string cedula, std::string fecha, 
 
 // Registra la salida si la hora cae en la ventana de salida de alguna franja del profesor
 // y en esa franja y fecha ya se registró la entrada.
+// Devuelve false sin modificar nada si la fecha cae en sábado o domingo.
 bool SistemaAsistencia::registrarSalida(std::string cedula, std::string fecha, Hora* hora)
 {
    // La fecha debe ser AAAA-MM-DD y existir en el calendario; sin hora no hay nada que comparar
    if (!Validador::validarFecha(fecha) || hora == nullptr)
+   {
+      return false;
+   }
+
+   // Sábados y domingos no hay clases: se rechaza antes de buscar la asistencia,
+   // así ninguna asistencia cambia de estado. La fecha llega como parámetro (no se lee el reloj)
+   if (Validador::esFinDeSemana(fecha))
    {
       return false;
    }

@@ -342,6 +342,14 @@ void Menu::menuProfesor(void)
          {
             return;
          }
+         // Primera barrera contra los fines de semana: se avisa con un mensaje específico y se
+         // vuelve al menú sin pedir la hora. Todavía no se creó ningún Hora*, no hay nada que liberar.
+         // El sistema repite esta comprobación en registrarEntrada y registrarSalida como protección
+         if (Validador::esFinDeSemana(fecha))
+         {
+            std::cout << "No se puede registrar asistencia en sábado ni domingo." << std::endl;
+            continue;
+         }
          Hora* hora = leerHora();   // objeto nuevo: el menú es su dueño y lo libera al final
          if (hora == nullptr)
          {

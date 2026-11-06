@@ -48,6 +48,11 @@ public:
    // Que el número exista en el menú lo comprueba el Menu, no esta clase.
    static bool validarOpcionMenu(std::string opcion);
 
+   // Devuelve true si la fecha "AAAA-MM-DD" es válida y cae en sábado o domingo.
+   // Si la fecha no pasa validarFecha, devuelve false: quien llama debe validarla antes.
+   // Se usa para impedir el registro de asistencia en fines de semana.
+   static bool esFinDeSemana(std::string fecha);
+
 protected:
 private:
 
