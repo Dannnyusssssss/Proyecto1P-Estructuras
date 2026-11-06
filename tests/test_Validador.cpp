@@ -226,21 +226,37 @@ TEST_CASE("Validador_validarAula_vacia")
 // validarOpcionMenu
 // ---------------------------------------------------------------------
 
-// Verifica opciones válidas de uno y dos dígitos.
+// Verifica opciones válidas de uno y dos dígitos: el 0 solo, los límites de un dígito (1 y 7,
+// la última franja) y los límites de dos dígitos (10 y 99), ninguna con cero a la izquierda.
 TEST_CASE("Validador_validarOpcionMenu_validas")
 {
    CHECK(Validador::validarOpcionMenu("1") == true);
    CHECK(Validador::validarOpcionMenu("0") == true);
+   CHECK(Validador::validarOpcionMenu("7") == true);
+   CHECK(Validador::validarOpcionMenu("10") == true);
    CHECK(Validador::validarOpcionMenu("12") == true);
+   CHECK(Validador::validarOpcionMenu("99") == true);
 }
 
-// Verifica que se rechacen letras, signos, espacios y números de más de dos dígitos.
+// Verifica que se rechacen letras, signos, espacios antes o después y números de más de dos dígitos
+// (100 es el primer número de tres dígitos).
 TEST_CASE("Validador_validarOpcionMenu_invalidas")
 {
    CHECK(Validador::validarOpcionMenu("a") == false);
    CHECK(Validador::validarOpcionMenu("-1") == false);
    CHECK(Validador::validarOpcionMenu(" 1") == false);
+   CHECK(Validador::validarOpcionMenu("1 ") == false);
+   CHECK(Validador::validarOpcionMenu("100") == false);
    CHECK(Validador::validarOpcionMenu("123") == false);
+}
+
+// Verifica que se rechacen los ceros a la izquierda (decisión 27): cada opción tiene una sola
+// forma de escribirse, así "01" no pasa por "1" ni "00" por "0", igual que "001".
+TEST_CASE("Validador_validarOpcionMenu_cerosALaIzquierda")
+{
+   CHECK(Validador::validarOpcionMenu("01") == false);
+   CHECK(Validador::validarOpcionMenu("00") == false);
+   CHECK(Validador::validarOpcionMenu("001") == false);
 }
 
 // Verifica que la opción vacía (solo Enter) se rechace.

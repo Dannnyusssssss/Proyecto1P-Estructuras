@@ -218,10 +218,15 @@ bool Validador::validarAula(std::string aula)
 // Valida que la opción escrita en un menú sea un número.
 bool Validador::validarOpcionMenu(std::string opcion)
 {
-   // Uno o dos dígitos, sin signo ni espacios. El límite de dos dígitos evita
-   // textos enormes que desbordarían al convertirlos a int.
-   // Acepta "1", "0", "12". Rechaza "a", "", "-1", " 1" y "123".
-   static const std::regex patron(R"(^\d{1,2}$)");
+   // Dos alternativas, sin signo ni espacios:
+   //  - "0" exactamente (la opción de volver o salir)
+   //  - [1-9][0-9]?: un número de 1 o 2 dígitos cuyo primer dígito no es cero
+   // Así cada opción tiene una sola forma de escribirse: "1" sí, pero "01", "001" y "00" no
+   // (antes "01" se aceptaba como "1" y "001" no, lo que era incoherente).
+   // El límite de dos dígitos evita textos enormes que desbordarían al convertirlos a int.
+   // Acepta "0", "1", "7", "10", "99".
+   // Rechaza "01", "00", "001" (ceros a la izquierda), "100" (3 dígitos), "a", "", "-1", " 1" y "1 ".
+   static const std::regex patron(R"(^(0|[1-9][0-9]?)$)");
    return std::regex_match(opcion, patron);
 }
 
