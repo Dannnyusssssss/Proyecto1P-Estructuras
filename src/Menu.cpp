@@ -204,6 +204,17 @@ void Menu::menuAdministrador(void)
             return;
          }
 
+         // Decisión 29: apenas se tiene una cédula con formato válido, se comprueba que el profesor
+         // esté registrado. Si no lo está, no tiene sentido pedir la franja ni el aula
+         if (!sistema->existeProfesor(cedula))
+         {
+            // Mensaje específico, igual al del menú de profesor (decisión 28)
+            std::cout << "El profesor no está registrado." << std::endl;
+            // continue repite el bucle del menú de administrador (return volvería al principal).
+            // Todavía no se creó ninguna FranjaHoraria ni Hora*, así que no hay nada que liberar
+            continue;
+         }
+
          // Lista numerada de las 7 franjas: la franja n empieza a las 7 + 2*(n-1) horas
          std::cout << "Franjas disponibles:" << std::endl;
          for (int n = 1; n <= 7; n++)
@@ -259,11 +270,11 @@ void Menu::menuAdministrador(void)
          }
          else
          {
-            // La franja es predefinida y el aula es válida: queda profesor inexistente, franja
-            // repetida o aula ocupada en ese horario por otro profesor (decisión 25)
-            std::cout << "No se pudo asignar: verifique que el profesor esté registrado, "
-                         "que no tenga ya esa franja y que el aula no esté ocupada en ese "
-                         "horario por otro profesor." << std::endl;
+            // La franja es predefinida, el aula es válida y el profesor existe (se comprobó al leer
+            // la cédula): quedan la franja repetida o el aula ocupada en ese horario por otro
+            // profesor (decisión 25). agregarFranja igual revisa por dentro que el profesor exista
+            std::cout << "No se pudo asignar: verifique que el profesor no tenga ya esa franja "
+                         "y que el aula no esté ocupada en ese horario por otro profesor." << std::endl;
             delete franja;   // rechazada: el menú la libera, junto con sus dos horas (decisión 4)
          }
       }
