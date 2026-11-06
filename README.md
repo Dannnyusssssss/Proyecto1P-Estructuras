@@ -13,7 +13,7 @@ según la hora y las franjas horarias que tenga asignadas.
 Las franjas son fijas: bloques de 2 horas entre las 07:00 y las 21:00.
 
 | Franja | Horario       | Entrada       | Salida        |
-|--------|---------------|---------------|---------------|
+| ------ | ------------- | ------------- | ------------- |
 | 1      | 07:00 – 09:00 | 07:00 – 07:10 | 09:00 – 09:10 |
 | 2      | 09:00 – 11:00 | 09:00 – 09:10 | 11:00 – 11:10 |
 | 3      | 11:00 – 13:00 | 11:00 – 11:10 | 13:00 – 13:10 |
@@ -32,6 +32,9 @@ Las franjas son fijas: bloques de 2 horas entre las 07:00 y las 21:00.
 - Un profesor no puede tener franjas repetidas ni cruzadas.
 - No se permiten cédulas repetidas.
 - Un aula no puede estar asignada a dos profesores distintos en la misma franja (sin distinguir mayúsculas: A-101 y a-101 son la misma aula)
+- Los sábados y domingos no se puede registrar asistencia (ni entrada ni salida). Asignar franjas sí se puede cualquier día, porque son horarios semanales.
+- Para entrar al menú de profesor hay que escribir una cédula registrada; si no está registrada, el programa avisa y vuelve al menú principal.
+- Para asignar una franja, la cédula debe ser de un profesor registrado; si no lo es, el programa avisa sin pedir la franja ni el aula.
 
 ## Validaciones
 
@@ -40,8 +43,8 @@ Se hacen con expresiones regulares en la clase `Validador`:
 - **Cédula:** 10 dígitos, y además se comprueba que sea una cédula ecuatoriana real (provincia y dígito verificador).
 - **Nombre y apellido:** solo letras (con tildes y ñ) y espacios.
 - **Hora:** formato `HH:MM` de 24 horas.
-- **Fecha:** formato `AAAA-MM-DD`, con control de días por mes y años bisiestos.
-- **Opciones del menú:** solo números.
+- **Fecha:** formato `AAAA-MM-DD`, con control de días por mes y años bisiestos. Además se calcula el día de la semana para rechazar sábados y domingos.
+- **Opciones del menú:** solo números, sin ceros a la izquierda (`1` es válido; `01`, `00` y `001` no).
 
 ## Estructura del proyecto
 
@@ -51,20 +54,20 @@ Se hacen con expresiones regulares en la clase `Validador`:
 └── tests/     pruebas de unidad y la librería doctest
 ```
 
-| Archivo | Carpeta | Descripción |
-|---|---|---|
-| `IMostrable.h`, `IIdentificable.h`, `IListaDoble.h` | `include/` | Interfaces |
-| `Nodo.h`, `ListaDoble.h` | `include/` | Lista doble genérica (templates, solo `.h`) |
-| `Hora` | `include/` y `src/` | Guarda una hora como minutos desde medianoche |
-| `Persona`, `Profesor` | `include/` y `src/` | Datos del profesor y sus franjas |
-| `FranjaHoraria` | `include/` y `src/` | Horario, aula y reglas de la ventana de 10 minutos |
-| `Asistencia` | `include/` y `src/` | Registro de entrada y salida |
-| `Validador` | `include/` y `src/` | Validaciones con expresiones regulares |
-| `SistemaAsistencia` | `include/` y `src/` | Lógica principal del sistema |
-| `Menu` | `include/` y `src/` | Interacción con el usuario |
-| `main.cpp` | `src/` | Punto de entrada |
-| `test_<Clase>.cpp`, `pruebas_main.cpp` | `tests/` | Pruebas de unidad de cada clase |
-| `doctest.h`, `ElementoPrueba.h` | `tests/` | Librería de pruebas y clase auxiliar para probar la lista |
+| Archivo                                             | Carpeta             | Descripción                                               |
+| --------------------------------------------------- | ------------------- | --------------------------------------------------------- |
+| `IMostrable.h`, `IIdentificable.h`, `IListaDoble.h` | `include/`          | Interfaces                                                |
+| `Nodo.h`, `ListaDoble.h`                            | `include/`          | Lista doble genérica (templates, solo `.h`)               |
+| `Hora`                                              | `include/` y `src/` | Guarda una hora como minutos desde medianoche             |
+| `Persona`, `Profesor`                               | `include/` y `src/` | Datos del profesor y sus franjas                          |
+| `FranjaHoraria`                                     | `include/` y `src/` | Horario, aula y reglas de la ventana de 10 minutos        |
+| `Asistencia`                                        | `include/` y `src/` | Registro de entrada y salida                              |
+| `Validador`                                         | `include/` y `src/` | Validaciones con expresiones regulares                    |
+| `SistemaAsistencia`                                 | `include/` y `src/` | Lógica principal del sistema                              |
+| `Menu`                                              | `include/` y `src/` | Interacción con el usuario                                |
+| `main.cpp`                                          | `src/`              | Punto de entrada                                          |
+| `test_<Clase>.cpp`, `pruebas_main.cpp`              | `tests/`            | Pruebas de unidad de cada clase                           |
+| `doctest.h`, `ElementoPrueba.h`                     | `tests/`            | Librería de pruebas y clase auxiliar para probar la lista |
 
 El diagrama de clases se hizo en PowerDesigner.
 
@@ -93,12 +96,18 @@ Opciones útiles de las pruebas:
 - `.\pruebas.exe -s` muestra también las pruebas que pasan.
 - `.\pruebas.exe -tc="Hora*"` ejecuta solo las pruebas cuyo nombre empieza con `Hora`.
 
+## Uso del menú
+
+- **Administrador:** registrar profesores, asignar franjas (se elige una de las 7 y se escribe el aula), ver asistencias y ver profesores.
+- **Profesor:** al entrar se pide la cédula una sola vez. Dentro del menú se puede registrar la entrada, la salida y ver las propias asistencias sin volver a escribir la cédula.
+
 ## Uso de la hora y la fecha
 
 Al registrar una entrada o salida, el programa permite:
 
 - Presionar **Enter** para usar la hora y la fecha actuales del sistema.
 - Escribir una hora (`HH:MM`) o fecha (`AAAA-MM-DD`) manualmente, útil para probar las reglas de los 10 minutos.
+- Si la fecha es sábado o domingo, el registro se rechaza sin pedir la hora. Si hoy es fin de semana y quiere probar el sistema, escriba una fecha de lunes a viernes (por ejemplo `2026-11-09`).
 
 ## Tildes y ñ en la consola de Windows
 
