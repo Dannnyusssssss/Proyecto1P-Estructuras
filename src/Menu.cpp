@@ -300,9 +300,31 @@ void Menu::menuAdministrador(void)
 // Return:     void
 ////////////////////////////////////////////////////////////////////////
 
-// Bucle del menú de profesor: se repite hasta elegir 0 (volver).
+// Menú de profesor (decisión 28): primero pide la cédula y comprueba que el profesor esté
+// registrado; si no lo está, vuelve al menú principal sin mostrar el submenú. Si lo está,
+// repite el submenú hasta elegir 0 (volver), usando esa cédula en todas las opciones.
 void Menu::menuProfesor(void)
 {
+   // La cédula se pide una sola vez, antes de mostrar el submenú.
+   // leerCedula repite la petición hasta que el formato sea válido (Validador::validarCedula)
+   std::string cedula = leerCedula();
+   if (cedula.empty())
+   {
+      return;   // se terminó la entrada: no hay nada más que leer
+   }
+
+   // Si la cédula es válida pero nadie la registró, no tiene sentido mostrar el submenú:
+   // se avisa y se vuelve al menú principal sin pedir nada más
+   if (!sistema->existeProfesor(cedula))
+   {
+      std::cout << "El profesor no está registrado." << std::endl;
+      return;
+   }
+
+   // A partir de aquí la variable local cedula identifica al profesor mientras esté dentro
+   // del submenú: las opciones 1, 2 y 3 la usan sin volver a pedirla. Al elegir 0 se sale
+   // y la variable desaparece, así que la próxima vez se vuelve a pedir la cédula.
+   // No se guarda como atributo de Menu porque solo importa durante esta visita al submenú
    std::string linea;
    while (true)
    {
@@ -332,11 +354,7 @@ void Menu::menuProfesor(void)
       else if (opcion == 1 || opcion == 2)
       {
          // --- Registrar entrada (1) o salida (2): mismos datos, distinta regla ---
-         std::string cedula = leerCedula();
-         if (cedula.empty())
-         {
-            return;
-         }
+         // La cédula ya se pidió y comprobó al entrar al submenú: solo faltan la fecha y la hora
          std::string fecha = leerFecha();
          if (fecha.empty())
          {
@@ -385,11 +403,7 @@ void Menu::menuProfesor(void)
       else if (opcion == 3)
       {
          // --- Ver mis asistencias ---
-         std::string cedula = leerCedula();
-         if (cedula.empty())
-         {
-            return;
-         }
+         // Usa la cédula guardada al entrar al submenú, sin volver a pedirla
          sistema->mostrarAsistenciaProfesor(cedula);
       }
       else

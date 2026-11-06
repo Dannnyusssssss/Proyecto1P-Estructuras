@@ -341,6 +341,23 @@ void SistemaAsistencia::mostrarProfesores(void) const
    profesores->mostrarTodos();
 }
 
+// Agregado al modelo (decisión 28).
+// Indica si hay un profesor registrado con esa cédula. Recibe la cédula y devuelve true si existe;
+// con la cédula vacía devuelve false. Solo consulta: no crea, no modifica ni libera nada.
+bool SistemaAsistencia::existeProfesor(std::string cedula) const
+{
+   // Una cédula vacía nunca corresponde a un profesor (agregarProfesor exige una cédula válida)
+   if (cedula.empty())
+   {
+      return false;
+   }
+
+   // Reutiliza la búsqueda por clave de la lista: la clave de un Profesor es su cédula.
+   // buscar devuelve el puntero al profesor (que sigue siendo de la lista) o nullptr si no está;
+   // aquí solo se compara el puntero, no se guarda ni se libera
+   return profesores->buscar(cedula) != nullptr;
+}
+
 // Método privado auxiliar (decisión 25).
 // Compara dos aulas letra por letra sin distinguir mayúsculas: "A-101" y "a-101" son la misma.
 // No usa <cctype> (regla 8): pasa cada letra a mayúscula a mano. Basta con las letras de la

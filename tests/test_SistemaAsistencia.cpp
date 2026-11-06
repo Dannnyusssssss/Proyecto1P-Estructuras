@@ -489,6 +489,68 @@ TEST_CASE("SistemaAsistencia_registrarSalida_datosInvalidos")
 }
 
 // ---------------------------------------------------------------------
+// existeProfesor (decisión 28)
+// ---------------------------------------------------------------------
+
+// Verifica que en un sistema sin profesores ninguna cédula exista, aunque sea una cédula real.
+TEST_CASE("SistemaAsistencia_existeProfesor_listaVacia")
+{
+   SistemaAsistencia* sistema = new SistemaAsistencia();
+   CHECK(sistema->existeProfesor("1710034065") == false);
+   delete sistema;
+}
+
+// Verifica que, después de agregar un profesor, su cédula exista.
+TEST_CASE("SistemaAsistencia_existeProfesor_registrado")
+{
+   SistemaAsistencia* sistema = new SistemaAsistencia();
+   REQUIRE(AyudaSistema::agregarProfesor(sistema, "1710034065") == true);
+   CHECK(sistema->existeProfesor("1710034065") == true);
+   delete sistema;
+}
+
+// Verifica que una cédula real pero distinta a la registrada no exista.
+TEST_CASE("SistemaAsistencia_existeProfesor_cedulaDistinta")
+{
+   SistemaAsistencia* sistema = new SistemaAsistencia();
+   AyudaSistema::agregarProfesor(sistema, "1710034065");
+   CHECK(sistema->existeProfesor("0926687856") == false);
+   delete sistema;
+}
+
+// Verifica que la cédula vacía nunca exista, con la lista vacía y con profesores registrados.
+TEST_CASE("SistemaAsistencia_existeProfesor_cedulaVacia")
+{
+   SistemaAsistencia* sistema = new SistemaAsistencia();
+   CHECK(sistema->existeProfesor("") == false);
+   AyudaSistema::agregarProfesor(sistema, "1710034065");
+   CHECK(sistema->existeProfesor("") == false);
+   delete sistema;
+}
+
+// Verifica que, con dos profesores registrados, existan ambas cédulas
+// (la búsqueda encuentra tanto el primero como el último de la lista).
+TEST_CASE("SistemaAsistencia_existeProfesor_dosProfesores")
+{
+   SistemaAsistencia* sistema = new SistemaAsistencia();
+   AyudaSistema::agregarProfesor(sistema, "1710034065");
+   AyudaSistema::agregarProfesor(sistema, "0926687856", "Ana", "López");
+   CHECK(sistema->existeProfesor("1710034065") == true);
+   CHECK(sistema->existeProfesor("0926687856") == true);
+   delete sistema;
+}
+
+// Verifica que un profesor rechazado por agregarProfesor (nombre con números) no quede registrado:
+// existeProfesor solo mira la lista, y el rechazado nunca entró en ella.
+TEST_CASE("SistemaAsistencia_existeProfesor_rechazadoNoExiste")
+{
+   SistemaAsistencia* sistema = new SistemaAsistencia();
+   CHECK(AyudaSistema::agregarProfesor(sistema, "1710034065", "Juan3") == false);
+   CHECK(sistema->existeProfesor("1710034065") == false);
+   delete sistema;
+}
+
+// ---------------------------------------------------------------------
 // Fines de semana (decisión 26)
 // En todas estas pruebas el profesor, la franja y la hora son válidos: el único motivo
 // de rechazo posible es el día de la semana.

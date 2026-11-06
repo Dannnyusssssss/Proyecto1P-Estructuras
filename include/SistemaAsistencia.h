@@ -79,6 +79,11 @@ public:
    // sus franjas, o "No hay profesores registrados." si no hay ninguno.
    void mostrarProfesores(void) const;
 
+   // Agregado al modelo (decisión 28): devuelve true solo si hay un profesor registrado con esa
+   // cédula. Con la cédula vacía devuelve false. No modifica nada: el menú lo usa para comprobar
+   // al profesor apenas escribe su cédula, antes de mostrarle el submenú.
+   bool existeProfesor(std::string cedula) const;
+
 protected:
 private:
    ListaDoble<Profesor>* profesores;      // profesores registrados (el sistema es dueño de la lista)
